@@ -13,6 +13,8 @@ class RegisterRequest extends FormRequest {
         return true;
     }
 
+
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -23,7 +25,7 @@ class RegisterRequest extends FormRequest {
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'admin' => 'required|boolean',
-            'role' => 'required|enum|max:2|default:EX',
+            'role' => 'required|string|max:2',
             'email' => 'required|email|unique:users,email|max:255',
             'password' => [
                 'required',
