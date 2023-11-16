@@ -29,4 +29,16 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    Route::get('/bookings', 'App\Http\Controllers\BookingController@index');
+    Route::get('/bookings/{id}', 'App\Http\Controllers\BookingController@show');
+    Route::post('/bookings', 'App\Http\Controllers\BookingController@store');
+    Route::put('/bookings/{id}', 'App\Http\Controllers\BookingController@update');
+    Route::delete('/bookings/{id}', 'App\Http\Controllers\BookingController@destroy');
+
+
+    Route::get('/rooms/{id}', 'App\Http\Controllers\RoomController@show');
+    Route::get('/rooms', 'App\Http\Controllers\RoomController@index');
+    Route::get('/caterings', 'App\Http\Controllers\CateringController@index');
+    Route::get('/materials', 'App\Http\Controllers\MaterialController@index');
 });
