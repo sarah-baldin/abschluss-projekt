@@ -4,19 +4,26 @@ import { getCateringsAll, getMaterialsAll } from "../helper/helper";
 import { getBackgroundColorForRoom } from "../pages/Calendar";
 import { toast } from "react-toastify";
 import { Modal, Button, Form } from "react-bootstrap";
+import { useAuth } from "../contexts/AuthContext";
 
-const defaultEventData = {
-  user: "Sarah Baldin",
-  user_id: 1,
-  room_id: 1,
-  backgroundColor: "#abcdef",
-  customer_name: "",
-  person_count: 0,
-  start_date: "",
-  end_date: "",
-  caterings: [],
-  materials: [],
-  others: "",
+export const formatEventDate = (timestamp, variant = "full") => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  // Producing the format: yyyy-MM-ddThh:mm:ss
+  return variant === "full"
+    ? `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
+    : variant === "date"
+    ? `${year}-${month}-${day}`
+    : variant === "time"
+    ? `${hours}:${minutes}`
+    : new Error('Invalid type provided. Use "full", "date" or "time".');
 };
 
 const BookingModal = ({
@@ -26,11 +33,28 @@ const BookingModal = ({
   onEventChanged,
   bookingDate,
 }) => {
+  const { user } = useAuth();
   const [caterings, setCaterings] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState(defaultEventData);
+  const [formData, setFormData] = useState({});
   const [isMultiDays, setIsMultiDays] = useState(false);
+
+  console.log("user : ", user);
+
+  const defaultEventData = {
+    user: "undefined user",
+    user_id: 1,
+    room_id: 1,
+    backgroundColor: "#ff0000",
+    customer_name: "",
+    person_count: 0,
+    start_date: "",
+    end_date: "",
+    caterings: [],
+    materials: [],
+    others: "",
+  };
 
   const throwToast = (
     title,
@@ -67,26 +91,6 @@ const BookingModal = ({
     }
   };
 
-  const formatEventDate = (timestamp, variant = "full") => {
-    const date = new Date(timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
-    const day = String(date.getDate()).padStart(2, "0");
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    // Producing the format: yyyy-MM-ddThh:mm:ss
-    return variant === "full"
-      ? `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
-      : variant === "date"
-      ? `${year}-${month}-${day}`
-      : variant === "time"
-      ? `${hours}:${minutes}`
-      : new Error('Invalid type provided. Use "full", "date" or "time".');
-  };
-
   useEffect(() => {
     // transform CalendarEvent to correct Format for BookingModal Form
     const transformEventToBooking = (event) => {
@@ -94,7 +98,9 @@ const BookingModal = ({
       if (event) {
         const { title, extendedProps } = event;
         const customerName = title.split("(")[0].trim();
-        const userName = title.split("(")[1].trim().slice(0, -2);
+        const userName = user
+          ? `${user.firstname} ${user.firstname}`
+          : title.split("(")[1].trim().slice(0, -1);
 
         return {
           id: event.id,
@@ -104,7 +110,7 @@ const BookingModal = ({
           end_date: formatEventDate(extendedProps.end_date),
           person_count: extendedProps.person_count,
           others: extendedProps.others,
-          user_id: extendedProps.user_id,
+          user_id: user ? user.id : extendedProps.user_id,
           room_id: extendedProps.room_id,
           backgroundColor: getBackgroundColorForRoom(extendedProps.room_id),
           materials: extendedProps.materials,

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import { formatDate } from "@fullcalendar/core";
+import { formatEventDate } from "../components/BookingModal";
 import { ToastContainer } from "react-toastify";
 import BookingModal from "../components/BookingModal";
 import axios from "../axios";
@@ -21,10 +22,6 @@ export const getBackgroundColorForRoom = (roomId) => {
 };
 
 export const transformBookingToEvent = (booking) => {
-  const username = booking.user?.firstname
-    ? ` (booked by: ${booking.user?.firstname} ${booking.user?.lastname})`
-    : " (undefined Testuser)";
-
   const modifyDate = (date) => {
     return date.replace(" ", "T");
   };
@@ -36,7 +33,7 @@ export const transformBookingToEvent = (booking) => {
     ...{
       id: booking.id || null,
       allday: false,
-      title: booking.customer_name + username,
+      title: booking.customer_name,
       start: modifiedStartDate,
       end: modifiedEndDate,
       backgroundColor: getBackgroundColorForRoom(booking.room_id),
@@ -173,7 +170,6 @@ const CalendarView = () => {
 
   return (
     <div className="demo-app">
-      Calendar App
       {renderSidebar()}
       <div className="demo-app-main">
         <BookingModal
@@ -197,7 +193,7 @@ const CalendarView = () => {
 
   function renderSidebar() {
     return (
-      <div className="demo-app-sidebar m-3">
+      <div className="demo-app-sidebar mb-3">
         <div className="demo-app-sidebar-section"></div>
         <div className="demo-app-sidebar-section">
           <label>
@@ -231,7 +227,11 @@ const CalendarView = () => {
     );
   }
 
-  function renderEventContent(eventInfo) {
+  function renderEventContent({ event }) {
+    console.log(
+      "eventInfo for RENDERING events: ",
+      user.id === event.extendedProps.user_id
+    );
     return (
       <>
         <OverlayTrigger
@@ -245,15 +245,35 @@ const CalendarView = () => {
           <div
             className="sarah-test"
             style={{
-              backgroundColor: eventInfo.event.backgroundColor,
+              backgroundColor: event.backgroundColor,
               color: "white",
             }}
           >
-            <i>{eventInfo.event.title}</i>
-            <div className="event-text">
-              <b>{eventInfo.timeText}</b>
-              <i>{eventInfo.event.title}</i>
-            </div>
+            {user.id === event.extendedProps.user_id ? (
+              <div className="my-event">
+                <div className="event-timespan">
+                  <b>
+                    {formatEventDate(event.extendedProps.start_date, "time")} -{" "}
+                    {formatEventDate(event.extendedProps.end_date, "time")}
+                  </b>
+                </div>
+                <div className="event-title">
+                  <i>{event.title}</i>
+                </div>
+              </div>
+            ) : (
+              <div className="other-event">
+                <div className="event-timespan">
+                  <b>
+                    {formatEventDate(event.extendedProps.start_date, "time")} -{" "}
+                    {formatEventDate(event.extendedProps.end_date, "time")}
+                  </b>
+                </div>
+                <div className="event-title">
+                  <i>BLOCKER</i>
+                </div>
+              </div>
+            )}
           </div>
         </OverlayTrigger>
       </>
@@ -270,7 +290,10 @@ const CalendarView = () => {
             day: "numeric",
           })}
         </b>{" "}
-        - <i>{event.title}</i>
+        -{" "}
+        <i>
+          {user.id === event.extendedProps.user_id ? event.title : "BLOCKER"}
+        </i>
       </li>
     );
   }
