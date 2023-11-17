@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 import { formatDate } from "@fullcalendar/core";
 import { ToastContainer } from "react-toastify";
 import BookingModal from "../components/BookingModal";
 import axios from "../axios";
 import MyCalendar from "../components/MyCalendar";
+import { useAuth } from "../contexts/AuthContext";
 
 export const getBackgroundColorForRoom = (roomId) => {
   const colors = {
@@ -59,6 +62,7 @@ export const transformBookingToEvent = (booking) => {
 };
 
 const CalendarView = () => {
+  const { user } = useAuth();
   const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [events, setEvents] = useState([]);
   const [eventCount, setEventCount] = useState(0);
@@ -230,16 +234,28 @@ const CalendarView = () => {
   function renderEventContent(eventInfo) {
     return (
       <>
-        <div
-          className="sarah-test"
-          style={{
-            backgroundColor: eventInfo.event.backgroundColor,
-            color: "white",
-          }}
+        <OverlayTrigger
+          placement="top"
+          overlay={
+            <Tooltip id={`tooltip-top`}>
+              Tooltip on <strong>top</strong>.
+            </Tooltip>
+          }
         >
-          <b>{eventInfo.timeText}</b>
-          <i>{eventInfo.event.title}</i>
-        </div>
+          <div
+            className="sarah-test"
+            style={{
+              backgroundColor: eventInfo.event.backgroundColor,
+              color: "white",
+            }}
+          >
+            <i>{eventInfo.event.title}</i>
+            <div className="event-text">
+              <b>{eventInfo.timeText}</b>
+              <i>{eventInfo.event.title}</i>
+            </div>
+          </div>
+        </OverlayTrigger>
       </>
     );
   }
