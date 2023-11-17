@@ -92,7 +92,7 @@ const BookingModal = ({
     const transformEventToBooking = (event) => {
       console.log("transform event to booking", event);
       if (event) {
-        const { title, extendedProps } = event?._def;
+        const { title, extendedProps } = event;
         const customerName = title.split("(")[0].trim();
         const userName = title.split("(")[1].trim().slice(0, -2);
 
@@ -255,10 +255,6 @@ const BookingModal = ({
   const handleDeleteEvent = (e, event) => {
     e.preventDefault();
     console.log(" handleDeleteEvent() -> e: ", e, "event: ", event);
-
-    /* axios.get("/sanctum/csrf-cookie").then((response) => {
-      console.log(response.data);
-    }); */
 
     const deleteBooking = async (bookingId) => {
       try {
