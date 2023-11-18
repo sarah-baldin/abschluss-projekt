@@ -49,8 +49,6 @@ export default function Login() {
     }
   };
 
-  console.log(user);
-
   return (
     <section className="login-wrapper">
       <Card

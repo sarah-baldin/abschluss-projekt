@@ -24,8 +24,6 @@ const BookingModal = ({
   const [formData, setFormData] = useState({});
   const [isMultiDays, setIsMultiDays] = useState(false);
 
-  console.log("user : ", user);
-
   const throwToast = (
     title,
     type = "success",
@@ -63,7 +61,6 @@ const BookingModal = ({
 
   useEffect(() => {
     const transformedEvent = transformEventToBooking(selectedEvent, user);
-    console.log("transformedEvent", transformedEvent);
 
     setFormData((prevState) => {
       return {
@@ -173,7 +170,7 @@ const BookingModal = ({
       "handleUpdateEvent() -> Updating event with ID:",
       event.id,
       event
-    ); // Log the ID
+    );
 
     const updateBooking = async (bookingId, updatedData) => {
       try {
