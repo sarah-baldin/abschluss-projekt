@@ -26,7 +26,6 @@ const BookingModal = ({
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({});
   const [isMultiDays, setIsMultiDays] = useState(false);
-  const [needVouchers, setNeedVoucher] = useState(false);
 
   const throwToast = (
     title,
@@ -240,11 +239,6 @@ const BookingModal = ({
 
       return { ...prev, materials: newMaterials };
     });
-
-    // Check if the current material is id: 1 - "WLAN-Codes"
-    if (materialId === 1) {
-      setNeedVoucher(isChecked);
-    }
   };
 
   const renderCloseBadge = (materialId, materialName) => (
