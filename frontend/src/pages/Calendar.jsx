@@ -2,61 +2,17 @@ import { useState, useEffect } from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import { formatDate } from "@fullcalendar/core";
-import { formatEventDate } from "../components/BookingModal";
 import { ToastContainer } from "react-toastify";
 import BookingModal from "../components/BookingModal";
 import axios from "../axios";
+import {
+  userIsEventOwner,
+  transformBookingToEvent,
+  formatEventDate,
+} from "../helper/helper";
 import MyCalendar from "../components/MyCalendar";
 import { useAuth } from "../contexts/AuthContext";
-
-export const getBackgroundColorForRoom = (roomId) => {
-  const colors = {
-    1: "#1F2041",
-    2: "#4B3F72",
-    3: "#252525",
-    4: "#119DA4",
-    5: "#19647E",
-    6: "#E1A8A4",
-  };
-  return colors[roomId] || "#FFFFFF"; // Fallback-Farbe, falls keine Raum-ID gefunden wurde
-};
-
-export const transformBookingToEvent = (booking) => {
-  const modifyDate = (date) => {
-    return date.replace(" ", "T");
-  };
-
-  const modifiedStartDate = modifyDate(booking.start_date);
-  const modifiedEndDate = modifyDate(booking.end_date);
-
-  return {
-    ...{
-      id: booking.id || null,
-      allday: false,
-      title: booking.customer_name,
-      start: modifiedStartDate,
-      end: modifiedEndDate,
-      backgroundColor: getBackgroundColorForRoom(booking.room_id),
-      extendedProps: {
-        start_date: modifiedStartDate,
-        end_date: modifiedEndDate,
-        person_count: booking.person_count,
-        others: booking.others,
-        user_id: booking.user?.id || 257,
-        room_id: booking.room_id,
-        created_at: booking.created_at || new Date(),
-        updated_at: booking.updated_at || new Date(),
-        user: {
-          firstname: booking.user?.firstname || "Undefined",
-          lastname: booking.user?.lastname || "Test-User",
-          email: booking.user?.email || "undefinded@testuser.de",
-        },
-        materials: [...booking.materials],
-        caterings: [...booking.caterings],
-      },
-    },
-  };
-};
+import classNames from "classnames";
 
 const CalendarView = () => {
   const { user } = useAuth();
@@ -115,7 +71,7 @@ const CalendarView = () => {
   // just handle existing events
   const handleEventClick = (e) => {
     if (e.event) {
-      const { start_date, end_date } = e.event._def.extendedProps;
+      const { start_date, end_date } = e.event.extendedProps;
 
       setSelectedEvent(e.event);
       setBookingDate({
@@ -172,17 +128,21 @@ const CalendarView = () => {
     <div className="demo-app">
       {renderSidebar()}
       <div className="demo-app-main">
-        <BookingModal
-          show={showModal}
-          onHide={onHideModal}
-          selectedEvent={selectedEvent}
-          bookingDate={bookingDate}
-          onEventChanged={fetchEvents}
-        />
+        {selectedEvent !== null &&
+          showModal &&
+          userIsEventOwner(user, selectedEvent) && (
+            <BookingModal
+              show={showModal}
+              onHide={onHideModal}
+              selectedEvent={selectedEvent}
+              bookingDate={bookingDate}
+              onEventChanged={fetchEvents}
+            />
+          )}
         <MyCalendar
           fcEvents={events}
           fcWeekendsVisible={weekendsVisible}
-          fcRenderEventContent={renderEventContent}
+          fcRenderEventContent={EventContent}
           fcHandleDateSelect={handleDateSelect}
           fcHandleEventClick={handleEventClick}
         />
@@ -227,13 +187,9 @@ const CalendarView = () => {
     );
   }
 
-  function renderEventContent({ event }) {
-    console.log(
-      "eventInfo for RENDERING events: ",
-      user.id === event.extendedProps.user_id
-    );
-    return (
-      <>
+  function EventContent({ event }) {
+    const HandleTooltipRendering = ({ children }) => {
+      return userIsEventOwner(user, event) ? (
         <OverlayTrigger
           placement="top"
           overlay={
@@ -242,32 +198,48 @@ const CalendarView = () => {
             </Tooltip>
           }
         >
+          {children}
+        </OverlayTrigger>
+      ) : (
+        <>{children}</>
+      );
+    };
+
+    return (
+      <>
+        <HandleTooltipRendering>
           <div
-            className="sarah-test"
+            className={classNames(
+              "custom-event-wrapper",
+              userIsEventOwner(user, event)
+                ? "cursor-pointer"
+                : "cursor-pointer-disabled"
+            )}
             style={{
               backgroundColor: event.backgroundColor,
-              color: "white",
             }}
           >
             {user.id === event.extendedProps.user_id ? (
-              <div className="my-event">
+              <div className="custom-event my-event">
                 <div className="event-timespan">
                   <b>
-                    {formatEventDate(event.extendedProps.start_date, "time")} -{" "}
-                    {formatEventDate(event.extendedProps.end_date, "time")}
+                    {formatEventDate(event.extendedProps.start_date, "time")}
                   </b>
+                  <b className="mx-1">{" - "}</b>
+                  <b>{formatEventDate(event.extendedProps.end_date, "time")}</b>
                 </div>
                 <div className="event-title">
                   <i>{event.title}</i>
                 </div>
               </div>
             ) : (
-              <div className="other-event">
+              <div className="custom-event other-event">
                 <div className="event-timespan">
                   <b>
-                    {formatEventDate(event.extendedProps.start_date, "time")} -{" "}
-                    {formatEventDate(event.extendedProps.end_date, "time")}
+                    {formatEventDate(event.extendedProps.start_date, "time")}
                   </b>
+                  <b className="mx-1">{" - "}</b>
+                  <b>{formatEventDate(event.extendedProps.end_date, "time")}</b>
                 </div>
                 <div className="event-title">
                   <i>BLOCKER</i>
@@ -275,7 +247,7 @@ const CalendarView = () => {
               </div>
             )}
           </div>
-        </OverlayTrigger>
+        </HandleTooltipRendering>
       </>
     );
   }
