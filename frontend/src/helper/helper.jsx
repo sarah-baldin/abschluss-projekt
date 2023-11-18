@@ -1,5 +1,9 @@
 import axios from "../axios";
 
+export const userIsEventOwner = (user, event) => {
+  return event.extendedProps.user_id === user.id;
+};
+
 export const getRoomName = async (roomId) => {
   try {
     const response = await axios.get(`room/${roomId}`);
