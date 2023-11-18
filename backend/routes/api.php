@@ -28,6 +28,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 
+    Route::get('/rooms', [RoomController::class, 'index']);
+    Route::get('/caterings', [CateringController::class, 'index']);
+    Route::get('/materials', [MaterialController::class, 'index']);
+
     Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
 });
 
@@ -48,11 +52,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::put('/bookings/{id}', [BookingController::class, 'update']);
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
-
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
-    Route::get('/rooms', [RoomController::class, 'index']);
-    Route::get('/caterings', [CateringController::class, 'index']);
-    Route::get('/materials', [MaterialController::class, 'index']);
 
     Route::get('/create-voucher', [UniFiApiController::class, 'createVoucher']);
 });
