@@ -12,6 +12,69 @@ export const getBackgroundColorForRoom = (roomId) => {
   return colors[roomId] || "#FFFFFF"; // Fallback-Farbe, falls keine Raum-ID gefunden wurde
 };
 
+const defaultEventData = {
+  user: "undefined user",
+  user_id: 1,
+  room_id: 1,
+  backgroundColor: "#ff0000",
+  customer_name: "",
+  person_count: 0,
+  start_date: "",
+  end_date: "",
+  caterings: [],
+  materials: [],
+  others: "",
+};
+
+export const formatEventDate = (timestamp, variant = "full") => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() is zero-based
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  // Producing the format: yyyy-MM-ddThh:mm:ss
+  return variant === "full"
+    ? `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
+    : variant === "date"
+    ? `${year}-${month}-${day}`
+    : variant === "time"
+    ? `${hours}:${minutes}`
+    : new Error('Invalid type provided. Use "full", "date" or "time".');
+};
+
+// transform CalendarEvent to correct Format for BookingModal Form
+export const transformEventToBooking = (event, user) => {
+  console.log("transform event to booking", event);
+  if (event) {
+    const { title, extendedProps } = event;
+    const customerName = title.split("(")[0].trim();
+    const userName = user
+      ? `${user.firstname} ${user.firstname}`
+      : title.split("(")[1].trim().slice(0, -1);
+
+    return {
+      id: event.id,
+      user: userName,
+      customer_name: customerName,
+      start_date: formatEventDate(extendedProps.start_date),
+      end_date: formatEventDate(extendedProps.end_date),
+      person_count: extendedProps.person_count,
+      others: extendedProps.others,
+      user_id: user ? user.id : extendedProps.user_id,
+      room_id: extendedProps.room_id,
+      backgroundColor: getBackgroundColorForRoom(extendedProps.room_id),
+      materials: extendedProps.materials,
+      caterings: extendedProps.caterings,
+    };
+  } else {
+    return defaultEventData;
+  }
+};
+
 export const transformBookingToEvent = (booking) => {
   const modifyDate = (date) => {
     return date.replace(" ", "T");
