@@ -11,6 +11,74 @@
     background-color: #fff;
 }
 
+
+
+
+.form-group-wlan-info {
+    display: flex;
+
+    .form-floating {
+        flex: 1;
+
+        &:first-child {
+            margin-right: 5px!important;
+        }
+    }
+}
+
+.form-group-checkbox {
+    display: flex;
+    flex-wrap: wrap;
+
+    .form-label {
+        display: block;
+        font-weight: bold;
+        width: 100%;
+    }
+
+    .custom-checkbox {
+        margin: 0 8px 8px 0;
+    }
+
+    .badge-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 5px;
+      }
+
+      .close-badge {
+        cursor: pointer;
+        background-color: #fff; /* Set background color as needed */
+        padding: 5px;
+      }
+}
+
+
+.form-group-date {
+    display: flex;
+
+    .form-floating {
+        flex: 1;
+
+        &:first-child {
+            margin-right: 5px!important;
+        }
+    }
+}
+
+.form-group-time {
+    display: flex;
+
+    .form-floating {
+        flex: 1;
+
+        &:first-child {
+            margin-right: 5px!important;
+        }
+    }
+}
+
 .cursor-pointer {
     cursor: pointer;
     &-disabled{
