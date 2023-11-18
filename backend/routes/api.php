@@ -1,7 +1,12 @@
 <?php
 
 /* use Illuminate\Http\Request; */
-use App\Http\Controllers\AuthController;
+
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\RoomController;
+use App\Http\Controllers\Api\V1\CateringController;
+use App\Http\Controllers\Api\V1\MaterialsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,15 +35,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    Route::get('/bookings', 'App\Http\Controllers\BookingController@index');
-    Route::get('/bookings/{id}', 'App\Http\Controllers\BookingController@show');
-    Route::post('/bookings', 'App\Http\Controllers\BookingController@store');
-    Route::put('/bookings/{id}', 'App\Http\Controllers\BookingController@update');
-    Route::delete('/bookings/{id}', 'App\Http\Controllers\BookingController@destroy');
+    Route::get('/bookings', [BookingController::class, 'index']);
+    Route::get('/bookings/{id}', [BookingController::class, 'show']);
+    Route::post('/bookings', [BookingController::class, 'store']);
+    Route::put('/bookings/{id}', [BookingController::class, 'update']);
+    Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
 
-    Route::get('/rooms/{id}', 'App\Http\Controllers\RoomController@show');
-    Route::get('/rooms', 'App\Http\Controllers\RoomController@index');
-    Route::get('/caterings', 'App\Http\Controllers\CateringController@index');
-    Route::get('/materials', 'App\Http\Controllers\MaterialController@index');
+    Route::get('/rooms/{id}', [RoomController::class, 'show']);
+    Route::get('/rooms', [RoomController::class, 'index']);
+    Route::get('/caterings', [CateringController::class, 'index']);
+    Route::get('/materials', [MaterialController::class, 'index']);
+
+
 });
