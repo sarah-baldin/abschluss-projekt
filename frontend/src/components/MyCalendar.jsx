@@ -37,6 +37,7 @@ const MyCalendar = ({
       editable={false}
       selectable={true}
       selectMirror={true}
+      weekNumbers={true}
       weekends={fcWeekendsVisible}
       eventContent={fcRenderEventContent}
       select={fcHandleDateSelect}
