@@ -20,9 +20,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 /* unprotected routes */
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+
+Route::prefix('v1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 /*
     When a request is made to a route that uses the auth:sanctum middleware,
@@ -31,7 +35,7 @@ Route::post('/login', [AuthController::class, 'login']);
     If the token is invalid or missing,
     the request will be rejected with a 401 Unauthorized response.
 */
-Route::middleware('auth:sanctum')->group(function () {
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
@@ -45,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
     Route::get('/rooms', [RoomController::class, 'index']);
     Route::get('/caterings', [CateringController::class, 'index']);
-    Route::get('/materials', [MaterialController::class, 'index']);
+    Route::get('/materials', [MaterialsController::class, 'index']);
 
 
 });
