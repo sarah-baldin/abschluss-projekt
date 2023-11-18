@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CateringController;
 use App\Http\Controllers\Api\V1\MaterialController;
+use App\Http\Controllers\Api\V1\UniFiApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
 });
 
 /*
@@ -51,5 +54,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/caterings', [CateringController::class, 'index']);
     Route::get('/materials', [MaterialController::class, 'index']);
 
-
+    Route::get('/create-voucher', [UniFiApiController::class, 'createVoucher']);
 });
