@@ -1,7 +1,8 @@
 import Axios from "axios";
 
 const axios = Axios.create({
-  baseURL: "http://localhost:8000/api",
+  // eslint-disable-next-line no-undef
+  baseURL: import.meta.env.VITE_APP_AXIOS_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
