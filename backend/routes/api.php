@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CateringController;
-use App\Http\Controllers\Api\V1\MaterialsController;
+use App\Http\Controllers\Api\V1\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,7 +49,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
     Route::get('/rooms', [RoomController::class, 'index']);
     Route::get('/caterings', [CateringController::class, 'index']);
-    Route::get('/materials', [MaterialsController::class, 'index']);
+    Route::get('/materials', [MaterialController::class, 'index']);
 
 
 });
