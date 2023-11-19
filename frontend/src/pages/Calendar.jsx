@@ -54,7 +54,6 @@ const CalendarView = () => {
 
   useEffect(() => {
     setEventCount(events.length);
-    console.log("Alle events: ", events);
   }, [events]);
 
   const checkSameDay = (start, end) => {
@@ -71,15 +70,18 @@ const CalendarView = () => {
   // just handle existing events
   const handleEventClick = (e) => {
     if (e.event) {
-      const { start_date, end_date } = e.event.extendedProps;
+      const { user_id } = e.event.extendedProps;
 
-      setSelectedEvent(e.event);
-      setBookingDate({
-        start_date: start_date,
-        end_date: end_date,
-        isMulti: !checkSameDay(start_date, end_date),
-      });
-      setShowModal(true);
+      // Only open the modal if the event's user_id is the same as the logged-in user
+      if (user.id === user_id) {
+        setSelectedEvent(e.event);
+        setBookingDate({
+          start_date: e.event.startStr,
+          end_date: e.event.endStr,
+          isMulti: !checkSameDay(e.event.startStr, e.event.endStr),
+        });
+        setShowModal(true);
+      }
     } else {
       console.log("Calendar-> handleEventClick: no event clicked or selected!");
     }
@@ -111,7 +113,8 @@ const CalendarView = () => {
         modifiedEvent.endStr.split("T")[0];
     }
 
-    // Set these dates to state, and open your modal
+    console.log(start_date, end_date, isMulti);
+
     setBookingDate({
       start_date,
       end_date,
@@ -128,17 +131,13 @@ const CalendarView = () => {
     <div className="demo-app">
       {renderSidebar()}
       <div className="demo-app-main">
-        {selectedEvent !== null &&
-          showModal &&
-          userIsEventOwner(user, selectedEvent) && (
-            <BookingModal
-              show={showModal}
-              onHide={onHideModal}
-              selectedEvent={selectedEvent}
-              bookingDate={bookingDate}
-              onEventChanged={fetchEvents}
-            />
-          )}
+        <BookingModal
+          show={showModal}
+          onHide={onHideModal}
+          selectedEvent={selectedEvent}
+          bookingDate={bookingDate}
+          onEventChanged={fetchEvents}
+        />
         <MyCalendar
           fcEvents={events}
           fcWeekendsVisible={weekendsVisible}

@@ -67,8 +67,8 @@ export const transformEventToBooking = (event, user) => {
       end_date: formatEventDate(extendedProps.end_date),
       person_count: extendedProps.person_count,
       others: extendedProps.others,
-      voucher_count: extendedProps.voucher_count,
-      voucher_lifetime: extendedProps.voucher_lifetime,
+      voucher_count: extendedProps.voucher_count || 0,
+      voucher_lifetime: extendedProps.voucher_lifetime || 0,
       vouchers: extendedProps.vouchers,
       user_id: user ? user.id : extendedProps.user_id,
       room_id: extendedProps.room_id,
@@ -102,8 +102,8 @@ export const transformBookingToEvent = (booking) => {
         end_date: modifiedEndDate,
         person_count: booking.person_count,
         others: booking.others,
-        voucher_count: booking.voucher_count,
-        voucher_lifetime: booking.voucher_lifetime,
+        voucher_count: booking.voucher_count || 0,
+        voucher_lifetime: booking.voucher_lifetime || 0,
         vouchers: booking.vouchers,
         user_id: booking.user?.id || 257,
         room_id: booking.room_id,
@@ -120,7 +120,6 @@ export const transformBookingToEvent = (booking) => {
     },
   };
 };
-
 
 export const userIsEventOwner = (user, event) => {
   return event.extendedProps.user_id === user.id;

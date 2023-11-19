@@ -81,7 +81,7 @@ const BookingModal = ({
     // get materials and caterings data from api
     fetchMaterials();
     fetchCaterings();
-  }, [selectedEvent, bookingDate]);
+  }, [selectedEvent, bookingDate, user]);
 
   // handle BookingModal input changes
   const handleInputChange = (e) => {
@@ -117,21 +117,7 @@ const BookingModal = ({
           ...prev,
           ...{ end_date: `${value}T${timePart}` },
         };
-      } else if (name === "") {
-        const timePart = prev.end_date.split("T")[1];
-
-        return {
-          ...prev,
-          ...{ end_date: `${value}T${timePart}` },
-        };
       } else {
-        console.log(
-          "handleInputChange() else block: ",
-          name,
-          value,
-          prev,
-          formData
-        );
         return {
           ...prev,
           [name]: value,
@@ -246,9 +232,9 @@ const BookingModal = ({
                 value={formData.voucher_lifetime}
                 onChange={(e) => handleInputChange(e)}
               >
-                {Array.from({ length: 5 }, (_, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {index + 1}
+                {Array.from({ length: 6 }, (_, index) => (
+                  <option key={index} value={index}>
+                    {index}
                   </option>
                 ))}
               </Form.Control>
@@ -260,9 +246,9 @@ const BookingModal = ({
                 value={formData.voucher_count}
                 onChange={(e) => handleInputChange(e)}
               >
-                {Array.from({ length: 20 }, (_, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {index + 1}
+                {Array.from({ length: 21 }, (_, index) => (
+                  <option key={index} value={index}>
+                    {index}
                   </option>
                 ))}
               </Form.Control>
@@ -454,18 +440,18 @@ const BookingModal = ({
                   >
                     {material.name}
                     {isWlanCodes && isChecked && (
-                      <div className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                        <FontAwesomeIcon icon={faTimes} />
-                      </div>
-                    )}
-                    {isWlanCodes && isChecked && (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation(); // Stop the event propagation
-                        }}
-                      >
-                        {renderWlanOptions()}
-                      </div>
+                      <>
+                        <div className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                          <FontAwesomeIcon icon={faTimes} />
+                        </div>
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation(); // Stop the event propagation
+                          }}
+                        >
+                          {renderWlanOptions()}
+                        </div>
+                      </>
                     )}
                   </Button>
                 );
