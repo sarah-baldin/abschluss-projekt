@@ -5,6 +5,7 @@ import {
   getMaterialsAll,
   transformEventToBooking,
   formatEventDate,
+  modifyDate,
 } from "../helper/helper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -26,6 +27,10 @@ const BookingModal = ({
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({});
   const [isMultiDays, setIsMultiDays] = useState(false);
+  const [isNewBooking, setIsNewBooking] = useState(false);
+  const [isOverlapping, setIsOverlapping] = useState(false);
+  const [isCapacityExceeded, setIsCapacityExceeded] = useState(false);
+  const [validationErrorMessage, setValidationErrorMessage] = useState(false);
 
   const throwToast = (
     title,
@@ -63,7 +68,15 @@ const BookingModal = ({
   };
 
   useEffect(() => {
+    // get materials and caterings data from api
+    fetchMaterials();
+    fetchCaterings();
+  }, []);
+
+  useEffect(() => {
     const transformedEvent = transformEventToBooking(selectedEvent, user);
+    console.log("selectedEvent outside:", selectedEvent);
+    setIsNewBooking(selectedEvent === null);
 
     setFormData((prevState) => {
       return {
@@ -79,11 +92,47 @@ const BookingModal = ({
     setIsMultiDays(bookingDate.isMulti);
   }, [selectedEvent, bookingDate, user]);
 
+  // Fuction to check if new booking fits room capacities or room is booked already
+  const checkOverlappingAndCapacity = async (event, variant = "") => {
+    console.log("date.replace: ", modifyDate(event.start_date));
+    // Check for overlapping bookings and capacity
+    const response = await axios.post("/bookings/check-overlapping", {
+      room_id: event.room_id,
+      start_date: modifyDate(
+        event.start_date,
+        variant === "update" && "rm-Zone"
+      ),
+      end_date: modifyDate(event.end_date, variant === "update" && "rm-Zone"),
+      person_count: event.person_count,
+    });
+
+    const { overlapping, capacityExceeded } = response.data;
+
+    setIsOverlapping(overlapping);
+    setIsCapacityExceeded(capacityExceeded);
+
+    // You can display a toast or perform other actions based on the results
+    if (capacityExceeded && overlapping) {
+      setValidationErrorMessage(
+        "Raum zu dieser Zeit nicht verfügbar & Raumkapazität überschritten!",
+        "error"
+      );
+    } else if (capacityExceeded) {
+      setValidationErrorMessage("Raumkapazität überschritten!", "error");
+    } else if (overlapping) {
+      setValidationErrorMessage(
+        "Raum zu dieser Zeit nicht verfügbar!",
+        "error"
+      );
+    }
+  };
+
   useEffect(() => {
-    // get materials and caterings data from api
-    fetchMaterials();
-    fetchCaterings();
-  }, []);
+    // Watch for changes in start_date, end_date, and room_id
+    if (formData.start_date && formData.end_date && formData.room_id) {
+      checkOverlappingAndCapacity(formData);
+    }
+  }, [formData]);
 
   // handle BookingModal input changes
   const handleInputChange = (e) => {
@@ -132,26 +181,34 @@ const BookingModal = ({
   const handleSubmitEvent = (e, formData) => {
     console.log("handleSubmitEvent() -> event: ", e, "formData: ", formData);
     e.preventDefault();
+    checkOverlappingAndCapacity(formData);
 
-    axios
-      .post("/bookings", formData)
-      .then((response) => {
-        console.log("api response from storeBookings: ", response.data);
+    // Check if there are overlapping bookings or capacity is exceeded
+    if (isOverlapping || isCapacityExceeded) {
+      // Display a toast or handle the situation accordingly
+      throwToast(validationErrorMessage, "error");
+      return;
+    } else {
+      axios
+        .post("/bookings", formData)
+        .then((response) => {
+          console.log("api response from storeBookings: ", response.data);
 
-        // Assuming response.data contains the newly created booking with the correct ID
-        setFormData((prev) => ({
-          ...prev,
-          id: response.data.id,
-        }));
+          // Assuming response.data contains the newly created booking with the correct ID
+          setFormData((prev) => ({
+            ...prev,
+            id: response.data.id,
+          }));
 
-        onEventChanged();
-        onHide();
-        throwToast("Buchung erfolgreich!");
-      })
-      .catch((error) => {
-        throwToast("Buchung nicht erfolgreich!", "error");
-        console.error("There was an error fetching the data", error);
-      });
+          onEventChanged();
+          onHide();
+          throwToast("Buchung erfolgreich!");
+        })
+        .catch((error) => {
+          throwToast("Buchung nicht erfolgreich!", "error");
+          console.error("There was an error fetching the data", error);
+        });
+    }
   };
 
   // handle form update
@@ -164,22 +221,43 @@ const BookingModal = ({
     );
 
     const updateBooking = async (bookingId, updatedData) => {
-      try {
-        const response = await axios.put(`bookings/${bookingId}`, updatedData);
-        console.log("api response from updateBooking: ", response.data);
+      // TODO!!!!! check error in console!
+      checkOverlappingAndCapacity(updatedData);
 
-        // Assuming response.data contains the updated booking with the correct ID
-        setFormData((prev) => ({
-          ...prev,
-          id: response.data.id,
-        }));
+      const modifiedData = {
+        ...updatedData,
+        start_date: modifyDate(updatedData.start_date, "rm-Zone"),
+        end_date: modifyDate(updatedData.end_date, "rm-Zone"),
+      };
 
-        onEventChanged();
-        onHide();
-        throwToast("Buchung erfolgreich geändert!");
-      } catch (error) {
-        throwToast("Änderung fehlgeschlagen!", "warning");
-        console.error("There was an error updating the booking:", error);
+      console.log("Modiefiiiiied: ", modifiedData);
+
+      // Check if there are overlapping bookings or capacity is exceeded
+      if (isOverlapping || isCapacityExceeded) {
+        // Display a toast or handle the situation accordingly
+        throwToast(validationErrorMessage, "error");
+        return;
+      } else {
+        try {
+          const response = await axios.put(
+            `bookings/${bookingId}`,
+            modifiedData
+          );
+          console.log("api response from updateBooking: ", response.data);
+
+          // Assuming response.data contains the updated booking with the correct ID
+          setFormData((prev) => ({
+            ...prev,
+            id: response.data.id,
+          }));
+
+          onEventChanged();
+          onHide();
+          throwToast("Buchung erfolgreich geändert!");
+        } catch (error) {
+          throwToast("Änderung fehlgeschlagen!", "warning");
+          console.error("There was an error updating the booking:", error);
+        }
       }
     };
 
@@ -481,24 +559,30 @@ const BookingModal = ({
                 WLAN-Code {index + 1}: {voucher.code}
               </div>
             ))}
-          {/* Submit Button */}
-          <Button type="submit" variant="success">
-            Buchen
-          </Button>
-          {/* Buchung bearbeiten/ löschen Buttons */}
-          <Button
-            variant="primary"
-            className="mx-3 my-3"
-            onClick={(e) => handleUpdateEvent(e, formData)}
-          >
-            Buchung ändern
-          </Button>
-          <Button
-            variant="danger"
-            onClick={(e) => handleDeleteEvent(e, formData)}
-          >
-            Buchung löschen
-          </Button>
+
+          {/* Modal CRUD-Buttons */}
+          <div className="crud-button-group d-flex my-3 gap-3">
+            {isNewBooking ? (
+              <Button type="submit" variant="success">
+                Buchen
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="primary"
+                  onClick={(e) => handleUpdateEvent(e, formData)}
+                >
+                  Buchung ändern
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={(e) => handleDeleteEvent(e, formData)}
+                >
+                  Buchung löschen
+                </Button>
+              </>
+            )}
+          </div>
         </Form>
       </Modal.Body>
     </Modal>

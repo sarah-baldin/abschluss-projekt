@@ -80,13 +80,25 @@ export const transformEventToBooking = (event, user) => {
   }
 };
 
-export const transformBookingToEvent = (booking) => {
-  const modifyDate = (date) => {
-    return date.replace(" ", "T");
-  };
+export const modifyDate = (date, variant = "remove-T") => {
+  let modifiedDate = "";
+  if (variant === "remove-T") {
+    const step = date.replace("T", " ");
+    modifiedDate = step.split("+")[0];
+  } else if (variant === "add-T") {
+    modifiedDate = date.replace(" ", "T");
+  } else if (variant === "rm-Zone") {
+    modifiedDate = date.split("+")[0];
+  } else {
+    modifiedDate = date;
+  }
 
-  const modifiedStartDate = modifyDate(booking.start_date);
-  const modifiedEndDate = modifyDate(booking.end_date);
+  return modifiedDate;
+};
+
+export const transformBookingToEvent = (booking) => {
+  const modifiedStartDate = modifyDate(booking.start_date, "add-T");
+  const modifiedEndDate = modifyDate(booking.end_date, "add-T");
 
   let voucherData = {
     lifetime: 0,

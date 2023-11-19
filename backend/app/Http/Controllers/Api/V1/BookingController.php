@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Services\UniFiApiVoucherService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
@@ -149,5 +150,47 @@ class BookingController extends Controller
         $booking->delete();
 
         return response()->json(['message' => 'Booking deleted successfully']);
+    }
+
+
+    public function checkOverlapping(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'start_date' => 'required|date_format:Y-m-d H:i:s',
+            'end_date' => 'required|date_format:Y-m-d H:i:s',
+            'person_count' => 'required|integer',
+        ]);
+
+        $roomId = $request->input('room_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $personCount = $request->input('person_count');
+
+        // Check for overlapping bookings excluding the current room
+        $overlapping = Booking::where('room_id', '!=', $roomId) // Exclude the current room
+            ->where(function ($query) use ($roomId, $startDate, $endDate) {
+                $query->where(function ($q) use ($roomId, $startDate, $endDate) {
+                    $q->where('room_id', '!=', $roomId) // Exclude the current room
+                        ->where('start_date', '<', $endDate)
+                        ->where('end_date', '>', $startDate);
+                })
+                    ->orWhere(function ($q) use ($roomId, $startDate, $endDate) {
+                        $q->where('room_id', '!=', $roomId) // Exclude the current room
+                            ->where('start_date', '>=', $startDate)
+                            ->where('end_date', '<=', $endDate);
+                    });
+            })
+            ->exists();
+
+        // Check if the room capacity is exceeded
+        $roomCapacity = DB::table('rooms')->where('id', $roomId)->value('max_persons');
+        $capacityExceeded = $personCount > $roomCapacity;
+
+        return response()->json([
+            'overlapping' => $overlapping,
+            'capacityExceeded' => $capacityExceeded,
+        ]);
     }
 }

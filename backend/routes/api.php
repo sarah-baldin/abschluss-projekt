@@ -33,7 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/materials', [MaterialController::class, 'index']);
 
     Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
-    Route::post('/create-voucher', [UniFiApiController::class, 'createVoucher']);
+    Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']);
 });
 
 /*
@@ -54,5 +54,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
+
+    Route::post('/create-voucher', [UniFiApiController::class, 'createVoucher']);
+    /* Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']); */
 
 });

@@ -111,8 +111,6 @@ const CalendarView = () => {
         modifiedEvent.endStr.split("T")[0];
     }
 
-    console.log(start_date, end_date, isMulti);
-
     setBookingDate({
       start_date,
       end_date,
