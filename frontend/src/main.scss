@@ -12,9 +12,12 @@
 }
 
 
+.wlan-selected {
+    position: relative;
+  }
 
 
-.form-group-wlan-info {
+.form-group-wlan-options {
     display: flex;
 
     .form-floating {

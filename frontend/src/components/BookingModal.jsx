@@ -243,12 +243,56 @@ const BookingModal = ({
 
   const renderCloseBadge = (materialId, materialName) => (
     <div
-      className="close-badge"
+      className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
       onClick={() => handleCheckboxChange(materialId, materialName, false)}
     >
       <FontAwesomeIcon icon={faTimes} />
     </div>
   );
+
+  // Function to render WLAN-Code button or voucher codes
+  const renderWlanOptions = () => {
+    const isWlanCodesChecked = formData.materials.some((item) => item.id === 1);
+    return (
+      <>
+        {isWlanCodesChecked && (
+          <div className="form-group-wlan-options">
+            <FloatingLabel
+              controlId="voucher_lifetime"
+              label="Gültigkeit (Tage)?"
+            >
+              <Form.Control
+                as="select"
+                name="voucher_lifetime"
+                value={formData.voucher_lifetime}
+                onChange={(e) => handleInputChange(e)}
+              >
+                {Array.from({ length: 5 }, (_, index) => (
+                  <option key={index + 1} value={index + 1}>
+                    {index + 1}
+                  </option>
+                ))}
+              </Form.Control>
+            </FloatingLabel>
+            <FloatingLabel controlId="voucher_count" label="Anzahl Codes?">
+              <Form.Control
+                as="select"
+                name="voucher_count"
+                value={formData.voucher_count}
+                onChange={(e) => handleInputChange(e)}
+              >
+                {Array.from({ length: 20 }, (_, index) => (
+                  <option key={index + 1} value={index + 1}>
+                    {index + 1}
+                  </option>
+                ))}
+              </Form.Control>
+            </FloatingLabel>
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <Modal show={show} onHide={onHide}>
@@ -398,24 +442,29 @@ const BookingModal = ({
                   <Button
                     key={idx + material.name}
                     variant={isChecked ? "primary" : "outline-primary"}
-                    className={classNames("m-2", {
+                    className={classNames("m-2", "wlan-selected", {
                       "w-100": isWlanCodes && isChecked,
                     })}
                     onClick={(e) => {
                       e.stopPropagation(); // Stop the event propagation
-                      handleCheckboxChange(
-                        material.id,
-                        material.name,
-                        !isChecked
-                      );
+
+                      if (isWlanCodes && isChecked) {
+                        // If Wlan-Codes is checked and has vouchers, uncheck the button
+                        handleCheckboxChange(material.id, material.name, false);
+                      } else {
+                        // Otherwise, proceed with the normal checkbox change
+                        handleCheckboxChange(
+                          material.id,
+                          material.name,
+                          !isChecked
+                        );
+                      }
                     }}
                   >
                     {material.name}
-                    {isWlanCodes && isChecked && (
-                      <div className="badge-container">
-                        {renderCloseBadge(material.id, material.name)}
-                      </div>
-                    )}
+                    {isWlanCodes &&
+                      isChecked &&
+                      renderCloseBadge(material.id, material.name)}
                     {isWlanCodes && isChecked && (
                       <div
                         className="form-group-wlan-info"
@@ -423,45 +472,7 @@ const BookingModal = ({
                           e.stopPropagation(); // Stop the event propagation
                         }}
                       >
-                        <FloatingLabel
-                          controlId="voucher_lifetime"
-                          label="Gültigkeit in Tagen?"
-                        >
-                          <Form.Control
-                            as="select"
-                            name="voucher_lifetime"
-                            value={1}
-                            onChange={(e) => {
-                              handleInputChange(e);
-                            }}
-                          >
-                            {Array.from({ length: 5 }, (_, index) => (
-                              <option key={index + 1} value={index + 1}>
-                                {index + 1}
-                              </option>
-                            ))}
-                          </Form.Control>
-                        </FloatingLabel>
-                        <FloatingLabel
-                          controlId="voucher_count"
-                          label="Anzahl benötigter WLAN Codes?"
-                        >
-                          <Form.Control
-                            as="select"
-                            name="voucher_count"
-                            value={1}
-                            onChange={(e) => {
-                              e.stopPropagation(); // Stop the event propagation
-                              handleInputChange(e);
-                            }}
-                          >
-                            {Array.from({ length: 20 }, (_, index) => (
-                              <option key={index + 1} value={index + 1}>
-                                {index + 1}
-                              </option>
-                            ))}
-                          </Form.Control>
-                        </FloatingLabel>
+                        {renderWlanOptions()}
                       </div>
                     )}
                   </Button>
@@ -482,6 +493,16 @@ const BookingModal = ({
               />
             </FloatingLabel>
           </Form.Group>
+
+          {/* Add WLAN-Codes if existing */}
+          {formData.vouchers &&
+            formData.vouchers.length > 0 &&
+            formData.vouchers.map((voucher, index) => (
+              <div key={index} className="voucher-code my-3">
+                WLAN-Code {index + 1}: {voucher.code}
+              </div>
+            ))}
+
           {/* Submit Button */}
           <Button type="submit" variant="success">
             Buchen
