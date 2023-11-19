@@ -51,7 +51,6 @@ export const formatEventDate = (timestamp, variant = "full") => {
 
 // transform CalendarEvent to correct Format for BookingModal Form
 export const transformEventToBooking = (event, user) => {
-  console.log("transform event to booking", event);
   if (event) {
     const { title, extendedProps } = event;
     const customerName = title.split("(")[0].trim();
@@ -89,6 +88,19 @@ export const transformBookingToEvent = (booking) => {
   const modifiedStartDate = modifyDate(booking.start_date);
   const modifiedEndDate = modifyDate(booking.end_date);
 
+  let voucherData = {
+    lifetime: 0,
+    count: 0,
+    vouchers: [],
+  };
+
+  if (booking.vouchers.length > 0) {
+    voucherData = {
+      lifetime: booking.vouchers[0].voucher_lifetime,
+      count: booking.vouchers.length + 1,
+    };
+  }
+
   return {
     ...{
       id: booking.id || null,
@@ -102,8 +114,8 @@ export const transformBookingToEvent = (booking) => {
         end_date: modifiedEndDate,
         person_count: booking.person_count,
         others: booking.others,
-        voucher_count: booking.voucher_count || 0,
-        voucher_lifetime: booking.voucher_lifetime || 0,
+        voucher_count: voucherData.count,
+        voucher_lifetime: voucherData.lifetime || 0,
         vouchers: booking.vouchers,
         user_id: booking.user?.id || 257,
         room_id: booking.room_id,

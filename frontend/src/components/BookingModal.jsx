@@ -77,11 +77,13 @@ const BookingModal = ({
       };
     });
     setIsMultiDays(bookingDate.isMulti);
+  }, [selectedEvent, bookingDate, user]);
 
+  useEffect(() => {
     // get materials and caterings data from api
     fetchMaterials();
     fetchCaterings();
-  }, [selectedEvent, bookingDate, user]);
+  }, []);
 
   // handle BookingModal input changes
   const handleInputChange = (e) => {

@@ -82,8 +82,6 @@ const CalendarView = () => {
         });
         setShowModal(true);
       }
-    } else {
-      console.log("Calendar-> handleEventClick: no event clicked or selected!");
     }
   };
 
