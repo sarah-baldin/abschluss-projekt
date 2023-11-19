@@ -5,9 +5,19 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
+use App\Services\UniFiApiVoucherService;
 
 class BookingController extends Controller
 {
+
+    protected $voucherService;
+
+    public function __construct(UniFiApiVoucherService $voucherService)
+    {
+        $this->voucherService = $voucherService;
+    }
+
+
     public function show($id)
    {
        $booking = Booking::find($id);
@@ -21,7 +31,7 @@ class BookingController extends Controller
     public function index()
     {
         // Holen Sie alle Buchungen aus der Datenbank und laden Sie den zugehörigen Benutzer
-        $bookings = Booking::with(['user', 'materials', 'caterings'])->get();
+        $bookings = Booking::with(['user', 'materials', 'caterings', 'vouchers'])->get();
 
         // Geben Sie die Buchungen zurück (in diesem Fall als JSON)
         return response()->json($bookings);

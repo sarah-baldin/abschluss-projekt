@@ -19,6 +19,11 @@ class Booking extends Model
         'room_id'
     ];
 
+    public function vouchers()
+    {
+        return $this->hasMany(Voucher::class);
+    }
+
     public function user() {
         return $this->belongsTo(User::class);
     }
