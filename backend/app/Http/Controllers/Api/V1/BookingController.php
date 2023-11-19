@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Services\UniFiApiVoucherService;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -48,8 +49,11 @@ class BookingController extends Controller
             'others' => 'nullable|string',
             'user_id' => 'required|integer',
             'room_id' => 'required|integer',
+            'voucher_count' => 'required|integer',
+            'voucher_lifetime' => 'required|integer',
             'materials' => 'array', // Ensure materials are an array
-            'caterings' => 'array' // Ensure caterings are an array
+            'caterings' => 'array', // Ensure caterings are an array
+            'vouchers' => 'array', // Ensure vouchers are an array
         ]);
 
         // Buchung erstellen
@@ -63,6 +67,17 @@ class BookingController extends Controller
         $booking->room_id = $validatedData['room_id'];
 
         $booking->save();
+
+        $voucherCount = $request->input('voucher_count', 0);
+        $voucherLifetime = $request->input('voucher_lifetime', 0);
+
+        Log::info('Voucher Count: ' . $voucherCount);
+        Log::info('Voucher Lifetime: ' . $voucherLifetime);
+
+        // Generate vouchers and associate them with the booking, if vouchers are requested
+        if ($voucherCount && $voucherLifetime) {
+            $booking->getVouchers($voucherLifetime, $voucherCount);
+        }
 
          // Handle the materials and caterings arrays, extract only the 'id' values
          $materialIds = array_map(function ($material) {

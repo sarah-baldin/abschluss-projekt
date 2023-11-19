@@ -11,7 +11,8 @@ class CreateVouchersTable extends Migration
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->unsignedBigInteger('booking_id'); // This line was missing
+            $table->unsignedBigInteger('booking_id');
+            $table->unsignedBigInteger('voucher_lifetime');
             $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('cascade');
             $table->timestamps();
         });

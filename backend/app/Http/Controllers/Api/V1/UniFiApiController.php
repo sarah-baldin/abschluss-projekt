@@ -15,13 +15,11 @@ class UniFiApiController extends Controller
         $this->voucherService = $voucherService;
     }
 
-    // ... existing methods
-
     public function createVoucher(Request $request)
     {
         try {
-            $voucherLifetime = $request->input('voucher_lifetime', 1);
-            $voucherCount = $request->input('voucher_count', 1);
+            $voucherLifetime = $request->input('voucher_lifetime', 0);
+            $voucherCount = $request->input('voucher_count', 0);
 
             $vouchers = $this->voucherService->generateVoucher($voucherLifetime, $voucherCount);
 

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\UniFiApiVoucherService;
+use Illuminate\Support\Facades\Log;
 
 class Booking extends Model
 {
@@ -16,12 +18,47 @@ class Booking extends Model
         'end_date',
         'others',
         'user_id',
-        'room_id'
+        'room_id',
+        'code',
     ];
 
-    public function vouchers()
+
+    // Make $voucherService a transient property
+    protected $voucherService;
+
+    // Inject the voucher service through the constructor
+    public function __construct(array $attributes = [])
     {
-        return $this->hasMany(Voucher::class);
+        parent::__construct($attributes);
+        $this->voucherService = app(UniFiApiVoucherService::class);
+    }
+
+    public function getVouchers($lifetime, $count)
+    {
+        $vouchers = [];
+
+        $voucherResult = $this->voucherService->generateVoucher($lifetime, $count);
+        Log::info('Voucher Result in Model: ' . json_encode($voucherResult));
+
+        if ($voucherResult) {
+            foreach ($voucherResult as $voucherData) {
+                // Create a new Voucher model instance
+                $voucher = new Voucher([
+                    'code' => $voucherData->code,
+                    'voucher_lifetime' => $lifetime,
+                ]);
+
+                // Save the voucher to the vouchers table
+                $voucher->save();
+
+                // Associate the voucher with the booking
+                $this->vouchers()->attach($voucher->id);
+
+                $vouchers[] = $voucher;
+            }
+        }
+
+        return $vouchers;
     }
 
     public function user() {
@@ -38,5 +75,10 @@ class Booking extends Model
 
     public function materials() {
         return $this->belongsToMany('App\Models\Material', 'booking_material');
+    }
+
+    public function vouchers()
+    {
+        return $this->belongsToMany('App\Models\Voucher', 'booking_voucher');
     }
 }

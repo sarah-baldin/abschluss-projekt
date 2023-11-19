@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/materials', [MaterialController::class, 'index']);
 
     Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
+    Route::post('/create-voucher', [UniFiApiController::class, 'createVoucher']);
 });
 
 /*
@@ -54,5 +55,4 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
 
-    Route::get('/create-voucher', [UniFiApiController::class, 'createVoucher']);
 });

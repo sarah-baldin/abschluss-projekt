@@ -9,10 +9,14 @@ class Voucher extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['code', 'booking_id'];
+    protected $fillable = [
+        'voucher_lifetime',
+        'code',
+        'booking_id',
+    ];
 
-    public function booking()
+    public function bookings()
     {
-        return $this->belongsTo(Booking::class);
+        return $this->belongsToMany('App\Models\Booking', 'booking_voucher');
     }
 }
