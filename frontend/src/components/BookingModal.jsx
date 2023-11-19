@@ -218,37 +218,16 @@ const BookingModal = ({
     deleteBooking(event.id);
   };
 
-  const handleCheckboxChange = (materialId, materialName, isChecked) => {
+  const handleCheckboxChange = (itemId, itemName, isChecked, category) => {
     setFormData((prev) => {
-      const newMaterials = [...prev.materials];
-      const existingMaterialIndex = newMaterials.findIndex(
-        (item) => item.id === materialId
-      );
+      const newArray = !isChecked
+        ? [...prev[category], { id: itemId, name: itemName }]
+        : prev[category].filter((item) => item.id !== itemId);
 
-      if (isChecked) {
-        // If checked, add the material to formData.materials
-        if (existingMaterialIndex === -1) {
-          newMaterials.push({ id: materialId, name: materialName });
-        }
-      } else {
-        // If unchecked, remove the material from formData.materials
-        if (existingMaterialIndex !== -1) {
-          newMaterials.splice(existingMaterialIndex, 1);
-        }
-      }
-
-      return { ...prev, materials: newMaterials };
+      /* console.log({ ...prev, [category]: newArray }); */
+      return { ...prev, [category]: newArray };
     });
   };
-
-  const renderCloseBadge = (materialId, materialName) => (
-    <div
-      className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-      onClick={() => handleCheckboxChange(materialId, materialName, false)}
-    >
-      <FontAwesomeIcon icon={faTimes} />
-    </div>
-  );
 
   // Function to render WLAN-Code button or voucher codes
   const renderWlanOptions = () => {
@@ -414,10 +393,16 @@ const BookingModal = ({
                       onClick={() => {
                         const itemId = item.id;
                         const itemName = item.name;
-                        const isChecked = !formData.caterings.some(
+                        const isChecked = formData.caterings.some(
                           (catering) => catering.id === item.id
                         );
-                        handleCheckboxChange(itemId, itemName, isChecked);
+
+                        handleCheckboxChange(
+                          itemId,
+                          itemName,
+                          isChecked,
+                          "caterings"
+                        );
                       }}
                     >
                       {item.name}
@@ -429,7 +414,7 @@ const BookingModal = ({
           {/* Material */}
           <Form.Group className="form-group-checkbox mb-3">
             <Form.Label>Material</Form.Label>
-            <div>
+            <div className="materials-wrapper">
               {materials.map((material, idx) => {
                 const isChecked = formData.materials.some(
                   (item) => item.id === material.id
@@ -450,24 +435,31 @@ const BookingModal = ({
 
                       if (isWlanCodes && isChecked) {
                         // If Wlan-Codes is checked and has vouchers, uncheck the button
-                        handleCheckboxChange(material.id, material.name, false);
+                        handleCheckboxChange(
+                          material.id,
+                          material.name,
+                          true,
+                          "materials"
+                        );
                       } else {
                         // Otherwise, proceed with the normal checkbox change
                         handleCheckboxChange(
                           material.id,
                           material.name,
-                          !isChecked
+                          isChecked,
+                          "materials"
                         );
                       }
                     }}
                   >
                     {material.name}
-                    {isWlanCodes &&
-                      isChecked &&
-                      renderCloseBadge(material.id, material.name)}
+                    {isWlanCodes && isChecked && (
+                      <div className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <FontAwesomeIcon icon={faTimes} />
+                      </div>
+                    )}
                     {isWlanCodes && isChecked && (
                       <div
-                        className="form-group-wlan-info"
                         onClick={(e) => {
                           e.stopPropagation(); // Stop the event propagation
                         }}
@@ -493,7 +485,6 @@ const BookingModal = ({
               />
             </FloatingLabel>
           </Form.Group>
-
           {/* Add WLAN-Codes if existing */}
           {formData.vouchers &&
             formData.vouchers.length > 0 &&
@@ -502,7 +493,6 @@ const BookingModal = ({
                 WLAN-Code {index + 1}: {voucher.code}
               </div>
             ))}
-
           {/* Submit Button */}
           <Button type="submit" variant="success">
             Buchen

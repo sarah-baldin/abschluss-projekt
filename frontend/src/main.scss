@@ -16,6 +16,14 @@
     position: relative;
   }
 
+.materials-wrapper {
+    width: 96%;
+
+    button.wlan-selected.w-100 {
+        padding-bottom: 20px;
+    }
+}
+
 
 .form-group-wlan-options {
     display: flex;
@@ -52,8 +60,8 @@
 
       .close-badge {
         cursor: pointer;
-        background-color: #fff; /* Set background color as needed */
-        padding: 5px;
+        width: 34px;
+        height: 34px;
       }
 }
 
