@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import axios from "../axios";
 import { useAuth } from "../contexts/AuthContext";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
-import LoginRegisterCard from "../components/LoginRegisterCard";
 
 export default function Login() {
   const { user, setUser, csrfToken } = useAuth();
@@ -50,9 +49,9 @@ export default function Login() {
   };
 
   return (
-    <section className="login-wrapper">
+    <section className="login-wrapper d-flex align-items-center justify-content-center">
       <Card
-        className="login-register-card"
+        className="login-register-card w-50"
         style={{ margin: "auto", maxWidth: "60vw" }}
       >
         <Card.Header as="h5">Login</Card.Header>

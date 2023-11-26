@@ -1,15 +1,18 @@
 import { useEffect } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import axios from "../axios";
 import { useAuth } from "../contexts/AuthContext";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import CustomButton from "../components/custom/CustomButton";
+import { Col, Container, Row } from "react-bootstrap";
+import CustomButtonGroup from "../components/custom/CustomButtonGroup";
 
 export default function DefaultLayout() {
   const { user, setUser } = useAuth();
+  const location = useLocation();
 
-  // check if user is logged in or not from server
+  // check if user is logged in or not from the server
   useEffect(() => {
-    (async () => {
+    const fetchUser = async () => {
       try {
         const resp = await axios.get("/user");
         if (resp.status === 200) {
@@ -21,34 +24,31 @@ export default function DefaultLayout() {
           window.location.href = "/";
         }
       }
-    })();
+    };
+
+    fetchUser();
   }, []);
 
-  // if user is not logged in, redirect to login page
+  // if the user is not logged in, redirect to the login page
   if (!user) {
     return <Navigate to="/" />;
   }
 
-  // logout user
-  const handleLogout = async () => {
-    try {
-      const resp = await axios.post("/logout");
-      if (resp.status === 200) {
-        localStorage.removeItem("user");
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
     <>
       <Container>
         <Row>
           <Col className="d-flex justify-content-end mt-3">
-            <Button onClick={handleLogout} variant="danger">
-              Logout
-            </Button>
+            <CustomButtonGroup>
+              <CustomButton
+                useAs={
+                  location.pathname === "/dashboard"
+                    ? "toCalendar"
+                    : "toDashboard"
+                }
+              />
+              <CustomButton useAs="logout" />
+            </CustomButtonGroup>
           </Col>
         </Row>
         <Row>

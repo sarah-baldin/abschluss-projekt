@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
-import Profile from "./pages/Profile";
+import UserDashboard from "./pages/UserDashboard";
 import Register from "./pages/Register";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 import StandardLayout from "./layouts/StandardLayout";
@@ -30,8 +30,8 @@ const router = createBrowserRouter([
         element: <Calendar />,
       },
       {
-        path: "/profile",
-        element: <Profile />,
+        path: "/dashboard",
+        element: <UserDashboard />,
       },
     ],
   },

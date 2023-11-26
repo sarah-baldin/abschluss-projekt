@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import axios from "../axios";
+import axios from "../../axios";
 import {
   getCateringsAll,
   getMaterialsAll,
   transformEventToBooking,
   formatEventDate,
   modifyDate,
-} from "../helper/helper";
+} from "../../helper/helper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { Modal, Button, Form, FloatingLabel } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import classNames from "classnames";
 
 const BookingModal = ({

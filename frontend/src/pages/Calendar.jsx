@@ -3,14 +3,14 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import { formatDate } from "@fullcalendar/core";
 import { ToastContainer } from "react-toastify";
-import BookingModal from "../components/BookingModal";
+import BookingModal from "../components/booking/BookingModal";
 import axios from "../axios";
 import {
   userIsEventOwner,
   transformBookingToEvent,
   formatEventDate,
 } from "../helper/helper";
-import MyCalendar from "../components/MyCalendar";
+import MyCalendar from "../components/booking/MyCalendar";
 import { useAuth } from "../contexts/AuthContext";
 import classNames from "classnames";
 

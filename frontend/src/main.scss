@@ -4,6 +4,8 @@
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
         Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
+    min-height: 100vh;
+    height: 100%;
     font-size: 1rem;
     font-weight: 1.5;
     line-height: 1.5;
@@ -11,6 +13,14 @@
     background-color: #fff;
 }
 
+
+.modal-dialog{
+    width: 100vw;
+}
+
+.login-wrapper {
+    height: 100vh;
+}
 
 .wlan-selected {
     position: relative;
