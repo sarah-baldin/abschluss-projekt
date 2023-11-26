@@ -17,6 +17,10 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
+    public function isAdmin()
+    {
+        return $this->admin == 1;
+    }
 
     /**
      * The attributes that are mass assignable.

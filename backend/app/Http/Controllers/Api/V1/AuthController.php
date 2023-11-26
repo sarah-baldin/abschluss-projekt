@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -26,13 +27,17 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        /* $token = $user->createToken('auth_token')->plainTextToken;
 
         $cookie = cookie('token', $token, 60 * 168); // 7 days
 
         return response()->json([
             'user' => new UserResource($user),
-        ])->withCookie($cookie);
+        ])->withCookie($cookie); */
+
+        return response()->json([
+            'user' => new UserResource($user),
+        ]);
     }
 
     // login a user method
@@ -48,13 +53,13 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
         $cookie = cookie('token', $token, 60 * 24); // 1 day
 
         return response()->json([
             'user' => new UserResource($user),
         ])->withCookie($cookie);
     }
+
 
     // logout a user method
     public function logout(Request $request) {
