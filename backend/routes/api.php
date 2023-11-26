@@ -3,6 +3,7 @@
 /* use Illuminate\Http\Request; */
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\CateringController;
@@ -25,7 +26,6 @@ use Illuminate\Support\Facades\Route;
 /* unprotected routes */
 
 Route::prefix('v1')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::get('/rooms', [RoomController::class, 'index']);
@@ -33,7 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/materials', [MaterialController::class, 'index']);
 
     Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
-    Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']);
+    /* Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']); */
 });
 
 /*
@@ -45,7 +45,12 @@ Route::prefix('v1')->group(function () {
 */
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/register', [AuthController::class, 'register']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    Route::get('/users', [UserController::class, 'index']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
@@ -56,6 +61,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
 
     Route::post('/create-voucher', [UniFiApiController::class, 'createVoucher']);
-    /* Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']); */
+    Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']);
 
 });
