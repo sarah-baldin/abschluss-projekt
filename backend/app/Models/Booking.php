@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Services\UniFiApiVoucherService;
-use Illuminate\Support\Facades\Log;
 
 class Booking extends Model
 {
@@ -36,9 +35,7 @@ class Booking extends Model
     public function getVouchers($lifetime, $count)
     {
         $vouchers = [];
-
         $voucherResult = $this->voucherService->generateVoucher($lifetime, $count);
-        Log::info('Voucher Result in Model: ' . json_encode($voucherResult));
 
         if ($voucherResult) {
             foreach ($voucherResult as $voucherData) {
@@ -70,15 +67,15 @@ class Booking extends Model
     }
 
     public function caterings() {
-        return $this->belongsToMany('App\Models\Catering', 'booking_catering');
+        return $this->belongsToMany(Catering::class, 'booking_catering');
     }
 
     public function materials() {
-        return $this->belongsToMany('App\Models\Material', 'booking_material');
+        return $this->belongsToMany(Material::class, 'booking_material');
     }
 
     public function vouchers()
     {
-        return $this->belongsToMany('App\Models\Voucher', 'booking_voucher');
+        return $this->belongsToMany(Voucher::class, 'booking_voucher');
     }
 }

@@ -1,6 +1,5 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import bootstrapPlugin from "@fullcalendar/bootstrap";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import l17 from "@fullcalendar/core/locales/de";
@@ -17,7 +16,6 @@ const MyCalendar = ({
     <FullCalendar
       plugins={[
         dayGridPlugin,
-        timeGridPlugin,
         interactionPlugin,
         bootstrapPlugin,
         bootstrap5Plugin,
@@ -25,7 +23,7 @@ const MyCalendar = ({
       headerToolbar={{
         left: "prev,next today",
         center: "title",
-        right: "dayGridMonth,timeGridWeek,timeGridDay",
+        right: "dayGridMonth",
       }}
       initialView="dayGridMonth"
       timeZone="local"

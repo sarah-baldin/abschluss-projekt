@@ -1,12 +1,13 @@
 import axios from "../axios";
+import _ from "lodash";
 
 export const getBackgroundColorForRoom = (roomId) => {
   const colors = {
-    1: "#1F2041",
-    2: "#4B3F72",
-    3: "#252525",
-    4: "#119DA4",
-    5: "#19647E",
+    1: "#b1c903",
+    2: "#64c4bd",
+    3: "#196F74",
+    4: "#7d53a7",
+    5: "#3d565f",
     6: "#E1A8A4",
   };
   return colors[roomId] || "#FFFFFF"; // Fallback-Farbe, falls keine Raum-ID gefunden wurde
@@ -81,19 +82,23 @@ export const transformEventToBooking = (event, user) => {
 };
 
 export const modifyDate = (date, variant = "remove-T") => {
-  let modifiedDate = "";
-  if (variant === "remove-T") {
-    const step = date.replace("T", " ");
-    modifiedDate = step.split("+")[0];
-  } else if (variant === "add-T") {
-    modifiedDate = date.replace(" ", "T");
-  } else if (variant === "rm-Zone") {
-    modifiedDate = date.split("+")[0];
-  } else {
-    modifiedDate = date;
-  }
+  if (date) {
+    console.log("date, variant: ", date, variant);
+    let modifiedDate = "";
+    let emptyDate = _.isEmpty(date);
+    if (variant === "remove-T" && !emptyDate) {
+      const step = date.replace("T", " ");
+      modifiedDate = step.split("+")[0];
+    } else if (variant === "add-T") {
+      modifiedDate = date.replace(" ", "T");
+    } else if (variant === "rm-Zone") {
+      modifiedDate = date.split("+")[0];
+    } else {
+      modifiedDate = date;
+    }
 
-  return modifiedDate;
+    return modifiedDate;
+  }
 };
 
 export const transformBookingToEvent = (booking) => {
@@ -160,6 +165,16 @@ export const getRoomName = async (roomId) => {
 };
 
 export const getRoomsAll = async () => {
+  try {
+    const response = await axios.get(`rooms`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch rooms ", error);
+    return null;
+  }
+};
+
+export const getBookableRooms = async () => {
   try {
     const response = await axios.get(`rooms`);
     return response.data;

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use UniFi_API\Client;
-use Illuminate\Support\Facades\Log;
 
 class UniFiApiVoucherService
 {
@@ -19,7 +18,7 @@ class UniFiApiVoucherService
         try {
             $this->unifi->login();
 
-            $daysNeeded = $voucherLifetime * 1440;
+            $daysNeeded = $voucherLifetime * 1440; // 1440 minutes == 1 day
             $count = $voucherCount;
             $quota = 1;
             $note = 'created by uniFi API';
@@ -29,13 +28,10 @@ class UniFiApiVoucherService
 
             $voucherResult = $this->unifi->create_voucher($daysNeeded, $count, $quota, $note, $up, $down, $bytes);
 
-            Log::info('UniFiApiVoucherService voucherResult: ' . json_encode($voucherResult));
-
             if ($voucherResult && isset($voucherResult[0]->create_time)) {
                 $creationTime = $voucherResult[0]->create_time;
                 $vouchers = $this->unifi->stat_voucher($creationTime);
 
-                Log::info('UniFiApiVoucherService vouchers: ' . json_encode($vouchers));
                 return $vouchers;
             } else {
                 throw new \Exception('Error creating voucher. Check UniFi API response.');

@@ -1,24 +1,26 @@
 import { useState, useEffect } from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
-import { formatDate } from "@fullcalendar/core";
 import { ToastContainer } from "react-toastify";
 import BookingModal from "../components/booking/BookingModal";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import bootstrapPlugin from "@fullcalendar/bootstrap";
+import bootstrap5Plugin from "@fullcalendar/bootstrap5";
+import l17 from "@fullcalendar/core/locales/de";
+import interactionPlugin from "@fullcalendar/interaction";
 import axios from "../axios";
 import {
   userIsEventOwner,
   transformBookingToEvent,
   formatEventDate,
 } from "../helper/helper";
-import MyCalendar from "../components/booking/MyCalendar";
 import { useAuth } from "../contexts/AuthContext";
 import classNames from "classnames";
 
 const CalendarView = () => {
   const { user } = useAuth();
-  const [weekendsVisible, setWeekendsVisible] = useState(true);
   const [events, setEvents] = useState([]);
-  const [eventCount, setEventCount] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [bookingDate, setBookingDate] = useState({
@@ -26,10 +28,6 @@ const CalendarView = () => {
     end_date: {},
     isMulti: false,
   });
-
-  const handleWeekendsToggle = () => {
-    setWeekendsVisible(!weekendsVisible);
-  };
 
   const onHideModal = () => {
     setSelectedEvent(null);
@@ -51,10 +49,6 @@ const CalendarView = () => {
   useEffect(() => {
     fetchEvents();
   }, []);
-
-  useEffect(() => {
-    setEventCount(events.length);
-  }, [events]);
 
   const checkSameDay = (start, end) => {
     const date1 = new Date(start);
@@ -124,9 +118,18 @@ const CalendarView = () => {
   };
 
   return (
-    <div className="demo-app">
-      {renderSidebar()}
-      <div className="demo-app-main">
+    <div className="book-a-room">
+      <div className="test ">
+        <h1>book-a-room</h1>
+        <button
+          className="btn btn-success btn-lg"
+          onClick={() => setShowModal(true)}
+        >
+          Raum buchen
+        </button>
+      </div>
+
+      <div className="demo-app-main mt-5">
         <BookingModal
           show={showModal}
           onHide={onHideModal}
@@ -134,62 +137,51 @@ const CalendarView = () => {
           bookingDate={bookingDate}
           onEventChanged={fetchEvents}
         />
-        <MyCalendar
-          fcEvents={events}
-          fcWeekendsVisible={weekendsVisible}
-          fcRenderEventContent={EventContent}
-          fcHandleDateSelect={handleDateSelect}
-          fcHandleEventClick={handleEventClick}
+        <FullCalendar
+          plugins={[
+            dayGridPlugin,
+            interactionPlugin,
+            bootstrapPlugin,
+            bootstrap5Plugin,
+          ]}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth",
+          }}
+          initialView="dayGridMonth"
+          timeZone="local"
+          locale={l17}
+          firstDay={1}
+          defaultAllDay={false}
+          themeSystem="bootstrap4"
+          events={events}
+          editable={false}
+          selectable={true}
+          selectMirror={true}
+          weekNumbers={true}
+          weekends={true}
+          eventContent={EventContent}
+          select={handleDateSelect}
+          eventClick={handleEventClick}
         />
       </div>
       <ToastContainer />
     </div>
   );
 
-  function renderSidebar() {
-    return (
-      <div className="demo-app-sidebar mb-3">
-        <div className="demo-app-sidebar-section"></div>
-        <div className="demo-app-sidebar-section">
-          <label>
-            <input
-              type="checkbox"
-              checked={weekendsVisible}
-              onChange={handleWeekendsToggle}
-            ></input>
-            toggle weekends
-          </label>
-        </div>
-        <div className="demo-app-sidebar-section">
-          <label>
-            Anzahl Buchungsübersicht:{`  `}
-            <select onChange={(e) => setEventCount(e.target.value)}>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value={events.length}>{`alle(${events.length})`}</option>
-            </select>
-          </label>
-          <h2>
-            {events.length < eventCount ? "Letzte Buchungen" : "Alle Buchungen"}{" "}
-            ({events.length})
-          </h2>
-          <ul>{events.map(renderSidebarEvent)}</ul>
-        </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          Raum buchen
-        </button>
-      </div>
-    );
-  }
-
   function EventContent({ event }) {
     const HandleTooltipRendering = ({ children }) => {
+      console.log(event);
       return userIsEventOwner(user, event) ? (
         <OverlayTrigger
           placement="top"
           overlay={
-            <Tooltip id={`tooltip-top`}>
-              Tooltip on <strong>top</strong>.
+            <Tooltip className={classNames("tooltip-top", "bg-darker")}>
+              <div>
+                {event.title}
+                {`${event.extendedProps.user.firstname} ${event.extendedProps.user.lastname}`}
+              </div>
             </Tooltip>
           }
         >
@@ -244,24 +236,6 @@ const CalendarView = () => {
           </div>
         </HandleTooltipRendering>
       </>
-    );
-  }
-
-  function renderSidebarEvent(event) {
-    return (
-      <li key={event.id}>
-        <b>
-          {formatDate(event.start, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </b>{" "}
-        -{" "}
-        <i>
-          {user.id === event.extendedProps.user_id ? event.title : "BLOCKER"}
-        </i>
-      </li>
     );
   }
 };

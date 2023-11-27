@@ -3,22 +3,35 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Room;
+use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
 
     public function index()
     {
-        // Holen Sie alle Buchungen aus der Datenbank und laden Sie den zugehörigen Benutzer
-        $rooms = Room::all();
+        // Get the currently authenticated user
+        $user = auth()->user();
+        Log::debug("user---->", [$user && $user->role === 'RS']);
 
-        // Geben Sie die Buchungen zurück (in diesem Fall als JSON)
+        // Check if the user has either 'CO' or 'EX' role and filter rooms accordingly
+        $rooms = [];
+        if ($user && ($user->role === 'CO' || $user->role === 'EX')) {
+            // If the user has either 'CO' or 'EX' role, filter rooms accordingly
+            $rooms = Room::whereIn('id', [1, 2, 3])->get();
+        } elseif ($user && $user->role === 'RS') {
+            // If the user has the 'RS' role, get all rooms
+            $rooms = Room::all();
+        }
+
+        Log::debug("rooms---->", [$rooms]);
+
+        // Return the filtered rooms (in this case as JSON)
         return response()->json($rooms);
     }
 
-    // show function für room identifizierung
+    // show specific room
     public function show($id)
     {
         $room = Room::find($id);

@@ -229,7 +229,7 @@ const UserModal = ({
             </>
           )}
           <Button
-            variant="primary"
+            variant="secondary"
             type="submit"
             disabled={
               !userData.firstname ||
@@ -240,10 +240,10 @@ const UserModal = ({
             }
             className="my-3"
           >
-            Submit
+            Speichern
           </Button>{" "}
-          <Button variant="secondary" onClick={onHide}>
-            Discard
+          <Button variant="primary" onClick={onHide}>
+            Verwerfen
           </Button>
         </Form>
       </Modal.Body>

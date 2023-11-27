@@ -1,5 +1,21 @@
 @import 'react-toastify/dist/ReactToastify.css';
 
+$theme-colors: (
+  "primary": #3d565f,
+  "danger": #c2160d,
+  "secondary": #b1c903,
+  "white": #fff,
+  "dark": #64c4bd,
+  "darker": #3d565f,
+  "success": #b1c903,
+  "info": #ffd900,
+  "warning": #ff8700,
+  "default": #7d53a7,
+  "light": #cae8f2,
+  "lighter": rgba(242,249,252,.824),
+  "flag": #fdff00,
+);
+
 #root {
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI",
         Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -13,6 +29,28 @@
     background-color: #fff;
 }
 
+a {
+    text-decoration: none!important;
+
+    &.fc-daygrid-day-number, &.fc-col-header-cell-cushion {
+        color: var(--bs-darker);
+    }
+}
+
+.fc {
+    .fc-daygrid-week-number {
+        background-color: var(--bs-darker);
+        color: var(--bs-lighter);
+    }
+
+    .fc-header-toolbar {
+        .fc-button {
+            background-color: var(--bs-darker);
+        }
+    }
+}
+
+@import "bootstrap";
 
 .modal-dialog{
     width: 100vw;
@@ -109,7 +147,7 @@
 
 .custom-event-wrapper {
     color: #fff;
-    padding: 5px 8px;
+    padding: 2px 8px;
     border-radius: 8px;
     box-shadow: 2px 2px 5px 2px rgba(0,0,0,0.5);
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "../../axios";
+import _ from "lodash";
 import {
   getCateringsAll,
   getMaterialsAll,
+  getBookableRooms,
   transformEventToBooking,
   formatEventDate,
   modifyDate,
@@ -24,6 +26,7 @@ const BookingModal = ({
   const { user } = useAuth();
   const [caterings, setCaterings] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [bookableRooms, setBookableRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({});
   const [isMultiDays, setIsMultiDays] = useState(false);
@@ -67,11 +70,22 @@ const BookingModal = ({
     }
   };
 
+  const fetchBookableRooms = async () => {
+    const data = await getBookableRooms();
+    if (data) {
+      setBookableRooms(data);
+      setLoading(false);
+    }
+  };
+
+  // get materials, caterings and bookableRooms data from api on initial render
   useEffect(() => {
-    // get materials and caterings data from api
     fetchMaterials();
     fetchCaterings();
+    fetchBookableRooms();
   }, []);
+
+  console.log("RRROOOOMS: ", bookableRooms);
 
   useEffect(() => {
     const transformedEvent = transformEventToBooking(selectedEvent, user);
@@ -94,45 +108,48 @@ const BookingModal = ({
 
   // Fuction to check if new booking fits room capacities or room is booked already
   const checkOverlappingAndCapacity = async (event, variant = "") => {
-    console.log("date.replace: ", modifyDate(event.start_date));
+    let emptyDate = _.isEmpty(event.start_date);
+    console.log("date.replace: ", formData, modifyDate(event.start_date));
     // Check for overlapping bookings and capacity
-    const response = await axios.post("/bookings/check-overlapping", {
-      room_id: event.room_id,
-      start_date: modifyDate(
-        event.start_date,
-        variant === "update" && "rm-Zone"
-      ),
-      end_date: modifyDate(event.end_date, variant === "update" && "rm-Zone"),
-      person_count: event.person_count,
-    });
+    if (!emptyDate) {
+      const response = await axios.post("/bookings/check-overlapping", {
+        room_id: event.room_id,
+        start_date: modifyDate(
+          event.start_date,
+          variant === "update" && "rm-Zone"
+        ),
+        end_date: modifyDate(event.end_date, variant === "update" && "rm-Zone"),
+        person_count: event.person_count,
+      });
 
-    const { overlapping, capacityExceeded } = response.data;
+      const { overlapping, capacityExceeded } = response.data;
 
-    setIsOverlapping(overlapping);
-    setIsCapacityExceeded(capacityExceeded);
+      setIsOverlapping(overlapping);
+      setIsCapacityExceeded(capacityExceeded);
 
-    // You can display a toast or perform other actions based on the results
-    if (capacityExceeded && overlapping) {
-      setValidationErrorMessage(
-        "Raum zu dieser Zeit nicht verfügbar & Raumkapazität überschritten!",
-        "error"
-      );
-    } else if (capacityExceeded) {
-      setValidationErrorMessage("Raumkapazität überschritten!", "error");
-    } else if (overlapping) {
-      setValidationErrorMessage(
-        "Raum zu dieser Zeit nicht verfügbar!",
-        "error"
-      );
+      // You can display a toast or perform other actions based on the results
+      if (capacityExceeded && overlapping) {
+        setValidationErrorMessage(
+          "Raum zu dieser Zeit nicht verfügbar & Raumkapazität überschritten!",
+          "error"
+        );
+      } else if (capacityExceeded) {
+        setValidationErrorMessage("Raumkapazität überschritten!", "error");
+      } else if (overlapping) {
+        setValidationErrorMessage(
+          "Raum zu dieser Zeit nicht verfügbar!",
+          "error"
+        );
+      }
     }
   };
 
   useEffect(() => {
     // Watch for changes in start_date, end_date, and room_id
-    if (formData.start_date && formData.end_date && formData.room_id) {
+    if ((show, formData.start_date && formData.end_date && formData.room_id)) {
       checkOverlappingAndCapacity(formData);
     }
-  }, [formData]);
+  }, [show, formData]);
 
   // handle BookingModal input changes
   const handleInputChange = (e) => {
@@ -340,252 +357,256 @@ const BookingModal = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide}>
-      <Modal.Header closeButton onClick={() => onHide()}>
-        <Modal.Title>Raum buchen</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form onSubmit={(e) => handleSubmitEvent(e, formData)}>
-          {/* Raum */}
-          <Form.Group className="form-group-select mb-3">
-            <FloatingLabel controlId="room_id" label="Wähle einen Raum">
-              <Form.Control
-                as="select"
-                name="room_id"
-                value={formData.room_id}
-                onChange={handleInputChange}
-              >
-                <option value={1}>Kesselraum</option>
-                <option value={2}>Alte Räucherei</option>
-                <option value={3}>Kreativwerkstatt</option>
-                <option value={4}>Kammer 1</option>
-                <option value={5}>Kammer 2</option>
-                <option value={6}>Geheime Weide</option>
-              </Form.Control>
-            </FloatingLabel>
-          </Form.Group>
-          {/* Name des Kunden */}
-          <Form.Group className="form-group-input mb-3">
-            <FloatingLabel
-              controlId="customer_name"
-              label="Terminname | Name des Kunden"
-            >
-              <Form.Control
-                type="text"
-                name="customer_name"
-                value={formData.customer_name}
-                onChange={handleInputChange}
-              />
-            </FloatingLabel>
-          </Form.Group>
-          {/* Personenzahl */}
-          <Form.Group className="form-group-select mb-3">
-            <FloatingLabel controlId="person_count" label="Personenzahl">
-              <Form.Control
-                type="number"
-                name="person_count"
-                value={formData.person_count}
-                onChange={handleInputChange}
-              />
-            </FloatingLabel>
-          </Form.Group>
-          {/* Multi-day toggle */}
-          <Form.Check
-            type="checkbox"
-            name="multi"
-            label="Ist der Termin mehrtägig?"
-            className="mb-3"
-            checked={isMultiDays}
-            onChange={() => setIsMultiDays(!isMultiDays)}
-          />
-          {/* Start Date */}
-          <Form.Group className="form-group-date mb-3">
-            <FloatingLabel controlId="start_date" label="Datum">
-              <Form.Control
-                type="date"
-                name="start_date"
-                value={formatEventDate(formData.start_date, "date")}
-                onChange={(eventInfo) => handleInputChange(eventInfo)}
-              />
-            </FloatingLabel>
-
-            {/* End Date - Conditionally Rendered */}
-            {isMultiDays && (
-              <FloatingLabel controlId="end_date" label="End Datum">
+    !loading && (
+      <Modal show={show} onHide={onHide}>
+        <Modal.Header closeButton onClick={() => onHide()}>
+          <Modal.Title>Raum buchen</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={(e) => handleSubmitEvent(e, formData)}>
+            {/* Raum */}
+            <Form.Group className="form-group-select mb-3">
+              <FloatingLabel controlId="room_id" label="Wähle einen Raum">
                 <Form.Control
-                  type="date"
-                  name="end_date"
-                  value={formatEventDate(formData.end_date, "date")}
+                  as="select"
+                  name="room_id"
+                  value={formData.room_id}
+                  onChange={handleInputChange}
+                >
+                  {bookableRooms.map((room) => {
+                    <option key={`room-${room.id}`} value={room.id}>
+                      {room.name}
+                    </option>;
+                  })}
+                </Form.Control>
+              </FloatingLabel>
+            </Form.Group>
+            {/* Name des Kunden */}
+            <Form.Group className="form-group-input mb-3">
+              <FloatingLabel
+                controlId="customer_name"
+                label="Terminname | Name des Kunden"
+              >
+                <Form.Control
+                  type="text"
+                  name="customer_name"
+                  value={formData.customer_name}
                   onChange={handleInputChange}
                 />
               </FloatingLabel>
-            )}
-          </Form.Group>
-          {/* Start Time & End Time */}
-          <Form.Group className="form-group-time mb-3">
-            <FloatingLabel controlId="start" label="Start-Uhrzeit">
-              <Form.Control
-                type="time"
-                name="start"
-                value={formatEventDate(formData.start_date, "time")}
-                onChange={handleInputChange}
-              />
-            </FloatingLabel>
+            </Form.Group>
+            {/* Personenzahl */}
+            <Form.Group className="form-group-select mb-3">
+              <FloatingLabel controlId="person_count" label="Personenzahl">
+                <Form.Control
+                  type="number"
+                  name="person_count"
+                  value={formData.person_count}
+                  onChange={handleInputChange}
+                />
+              </FloatingLabel>
+            </Form.Group>
+            {/* Multi-day toggle */}
+            <Form.Check
+              type="checkbox"
+              name="multi"
+              label="Ist der Termin mehrtägig?"
+              className="mb-3"
+              checked={isMultiDays}
+              onChange={() => setIsMultiDays(!isMultiDays)}
+            />
+            {/* Start Date */}
+            <Form.Group className="form-group-date mb-3">
+              <FloatingLabel controlId="start_date" label="Datum">
+                <Form.Control
+                  type="date"
+                  name="start_date"
+                  value={formatEventDate(formData.start_date, "date")}
+                  onChange={(eventInfo) => handleInputChange(eventInfo)}
+                />
+              </FloatingLabel>
 
-            <FloatingLabel controlId="end" label="End-Uhrzeit">
-              <Form.Control
-                type="time"
-                name="end"
-                value={formatEventDate(formData.end_date, "time")}
-                onChange={handleInputChange}
-              />
-            </FloatingLabel>
-          </Form.Group>
-          {/* Verpflegung */}
-          <Form.Group className="form-group-checkbox mb-3">
-            <Form.Label>Verpflegung</Form.Label>
-            <div>
-              {!loading &&
-                caterings.map((item, idx) => {
-                  const isChecked = formData.caterings.some(
-                    (catering) => catering.id === item.id
+              {/* End Date - Conditionally Rendered */}
+              {isMultiDays && (
+                <FloatingLabel controlId="end_date" label="End Datum">
+                  <Form.Control
+                    type="date"
+                    name="end_date"
+                    value={formatEventDate(formData.end_date, "date")}
+                    onChange={handleInputChange}
+                  />
+                </FloatingLabel>
+              )}
+            </Form.Group>
+            {/* Start Time & End Time */}
+            <Form.Group className="form-group-time mb-3">
+              <FloatingLabel controlId="start" label="Start-Uhrzeit">
+                <Form.Control
+                  type="time"
+                  name="start"
+                  value={formatEventDate(formData.start_date, "time")}
+                  onChange={handleInputChange}
+                />
+              </FloatingLabel>
+
+              <FloatingLabel controlId="end" label="End-Uhrzeit">
+                <Form.Control
+                  type="time"
+                  name="end"
+                  value={formatEventDate(formData.end_date, "time")}
+                  onChange={handleInputChange}
+                />
+              </FloatingLabel>
+            </Form.Group>
+            {/* Verpflegung */}
+            <Form.Group className="form-group-checkbox mb-3">
+              <Form.Label>Verpflegung</Form.Label>
+              <div>
+                {!loading &&
+                  caterings.map((item, idx) => {
+                    const isChecked = formData.caterings.some(
+                      (catering) => catering.id === item.id
+                    );
+
+                    return (
+                      <Button
+                        key={idx + item.name}
+                        variant={isChecked ? "primary" : "outline-primary"}
+                        className="m-2"
+                        onClick={() => {
+                          const itemId = item.id;
+                          const itemName = item.name;
+                          const isChecked = formData.caterings.some(
+                            (catering) => catering.id === item.id
+                          );
+
+                          handleCheckboxChange(
+                            itemId,
+                            itemName,
+                            isChecked,
+                            "caterings"
+                          );
+                        }}
+                      >
+                        {item.name}
+                      </Button>
+                    );
+                  })}
+              </div>
+            </Form.Group>;
+            {
+              /* Material */
+            }
+            <Form.Group className="form-group-checkbox mb-3">
+              <Form.Label>Material</Form.Label>
+              <div className="materials-wrapper">
+                {materials.map((material, idx) => {
+                  const isChecked = formData.materials.some(
+                    (item) => item.id === material.id
                   );
+
+                  // Check if the current material is id: 1 - "WLAN-Codes"
+                  const isWlanCodes = material.id === 1;
 
                   return (
                     <Button
-                      key={idx + item.name}
+                      key={idx + material.name}
                       variant={isChecked ? "primary" : "outline-primary"}
-                      className="m-2"
-                      onClick={() => {
-                        const itemId = item.id;
-                        const itemName = item.name;
-                        const isChecked = formData.caterings.some(
-                          (catering) => catering.id === item.id
-                        );
+                      className={classNames("m-2", "wlan-selected", {
+                        "w-100": isWlanCodes && isChecked,
+                      })}
+                      onClick={(e) => {
+                        e.stopPropagation();
 
-                        handleCheckboxChange(
-                          itemId,
-                          itemName,
-                          isChecked,
-                          "caterings"
-                        );
+                        if (isWlanCodes && isChecked) {
+                          // If Wlan-Codes is checked and has vouchers, uncheck the button
+                          handleCheckboxChange(
+                            material.id,
+                            material.name,
+                            true,
+                            "materials"
+                          );
+                        } else {
+                          // Otherwise, proceed with the normal checkbox change
+                          handleCheckboxChange(
+                            material.id,
+                            material.name,
+                            isChecked,
+                            "materials"
+                          );
+                        }
                       }}
                     >
-                      {item.name}
+                      {material.name}
+                      {isWlanCodes && isChecked && (
+                        <>
+                          <div className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                            <FontAwesomeIcon icon={faTimes} />
+                          </div>
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            {renderWlanOptions()}
+                          </div>
+                        </>
+                      )}
                     </Button>
                   );
                 })}
-            </div>
-          </Form.Group>
-          {/* Material */}
-          <Form.Group className="form-group-checkbox mb-3">
-            <Form.Label>Material</Form.Label>
-            <div className="materials-wrapper">
-              {materials.map((material, idx) => {
-                const isChecked = formData.materials.some(
-                  (item) => item.id === material.id
-                );
-
-                // Check if the current material is id: 1 - "WLAN-Codes"
-                const isWlanCodes = material.id === 1;
-
-                return (
-                  <Button
-                    key={idx + material.name}
-                    variant={isChecked ? "primary" : "outline-primary"}
-                    className={classNames("m-2", "wlan-selected", {
-                      "w-100": isWlanCodes && isChecked,
-                    })}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Stop the event propagation
-
-                      if (isWlanCodes && isChecked) {
-                        // If Wlan-Codes is checked and has vouchers, uncheck the button
-                        handleCheckboxChange(
-                          material.id,
-                          material.name,
-                          true,
-                          "materials"
-                        );
-                      } else {
-                        // Otherwise, proceed with the normal checkbox change
-                        handleCheckboxChange(
-                          material.id,
-                          material.name,
-                          isChecked,
-                          "materials"
-                        );
-                      }
-                    }}
-                  >
-                    {material.name}
-                    {isWlanCodes && isChecked && (
-                      <>
-                        <div className="close-badge position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                          <FontAwesomeIcon icon={faTimes} />
-                        </div>
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation(); // Stop the event propagation
-                          }}
-                        >
-                          {renderWlanOptions()}
-                        </div>
-                      </>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-          </Form.Group>
-          {/* Sonstiges */}
-          <Form.Group className="form-group-input mb-3">
-            <FloatingLabel controlId="others" label="Sonst noch Wünsche?">
-              <Form.Control
-                type="textarea"
-                name="others"
-                size={"sm"}
-                value={formData.others}
-                onChange={handleInputChange}
-                placeholder="Sonstige Kommentare oder Anmerkungen..."
-              />
-            </FloatingLabel>
-          </Form.Group>
-          {/* Add WLAN-Codes if existing */}
-          {formData.vouchers &&
-            formData.vouchers.length > 0 &&
-            formData.vouchers.map((voucher, index) => (
-              <div key={index} className="voucher-code my-3">
-                WLAN-Code {index + 1}: {voucher.code}
               </div>
-            ))}
-
-          {/* Modal CRUD-Buttons */}
-          <div className="crud-button-group d-flex my-3 gap-3">
-            {isNewBooking ? (
-              <Button type="submit" variant="success">
-                Buchen
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="primary"
-                  onClick={(e) => handleUpdateEvent(e, formData)}
-                >
-                  Buchung ändern
+            </Form.Group>;
+            ; ;{/* Sonstiges */}
+            <Form.Group className="form-group-input mb-3">
+              <FloatingLabel controlId="others" label="Sonst noch Wünsche?">
+                <Form.Control
+                  type="textarea"
+                  name="others"
+                  size={"sm"}
+                  value={formData.others}
+                  onChange={handleInputChange}
+                  placeholder="Sonstige Kommentare oder Anmerkungen..."
+                />
+              </FloatingLabel>
+            </Form.Group>
+            {/* Add WLAN-Codes if existing */}
+            <div className="voucher-wrapper">
+              {formData.vouchers &&
+                formData.vouchers.length > 0 &&
+                formData.vouchers.map((voucher, index) => (
+                  <div key={index} className="voucher-code my-3">
+                    WLAN-Code {index + 1}: {voucher.code}
+                  </div>
+                ))}
+            </div>
+            {/* Modal CRUD-Buttons */}
+            <div className="crud-button-group d-flex my-3 gap-3">
+              {isNewBooking ? (
+                <Button type="submit" variant="success">
+                  Buchen
                 </Button>
-                <Button
-                  variant="danger"
-                  onClick={(e) => handleDeleteEvent(e, formData)}
-                >
-                  Buchung löschen
-                </Button>
-              </>
-            )}
-          </div>
-        </Form>
-      </Modal.Body>
-    </Modal>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={(e) => handleUpdateEvent(e, formData)}
+                  >
+                    Buchung ändern
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={(e) => handleDeleteEvent(e, formData)}
+                  >
+                    Buchung löschen
+                  </Button>
+                </>
+              )}
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    )
   );
 };
 

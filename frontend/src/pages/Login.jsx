@@ -9,7 +9,6 @@ import Card from "react-bootstrap/Card";
 export default function Login() {
   const { user, setUser, csrfToken } = useAuth();
   const [formInput, setFormInput] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     e.preventDefault();
@@ -42,14 +41,14 @@ export default function Login() {
       }
     } catch (error) {
       if (error.response.status === 401) {
-        setError(error.response.data.message);
+        console.log("error: ", error);
       }
-      console.log("error: ", error);
     }
   };
 
   return (
-    <section className="login-wrapper d-flex align-items-center justify-content-center">
+    <section className="login-wrapper d-flex flex-column align-items-center justify-content-center">
+      <h1 className="d-flex">book-a-room</h1>
       <Card
         className="login-register-card w-50"
         style={{ margin: "auto", maxWidth: "60vw" }}

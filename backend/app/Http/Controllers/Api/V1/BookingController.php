@@ -7,13 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Services\UniFiApiVoucherService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-
     protected $voucherService;
 
+    //register voucherService
     public function __construct(UniFiApiVoucherService $voucherService)
     {
         $this->voucherService = $voucherService;
@@ -22,6 +21,7 @@ class BookingController extends Controller
 
     public function show($id)
    {
+        // find specific booking by it's id
        $booking = Booking::find($id);
        if ($booking) {
            return response()->json($booking);
@@ -32,16 +32,15 @@ class BookingController extends Controller
 
     public function index()
     {
-        // Holen Sie alle Buchungen aus der Datenbank und laden Sie den zugehörigen Benutzer
+        // get all bookings with related users, materials, caterings and vouhcers
         $bookings = Booking::with(['user', 'materials', 'caterings', 'vouchers'])->get();
 
-        // Geben Sie die Buchungen zurück (in diesem Fall als JSON)
         return response()->json($bookings);
     }
 
     public function store(Request $request)
     {
-        // Datenvalidierung
+        // validate data
         $validatedData = $request->validate([
             'customer_name' => 'required',
             'person_count' => 'required|integer',
@@ -51,13 +50,12 @@ class BookingController extends Controller
             'user_id' => 'required|integer',
             'room_id' => 'required|integer',
             'voucher_count' => 'required|integer',
-            'voucher_lifetime' => 'required|integer',
-            'materials' => 'array', // Ensure materials are an array
-            'caterings' => 'array', // Ensure caterings are an array
-            'vouchers' => 'array', // Ensure vouchers are an array
+            'voucher_lifetime' => 'required|integer', 'materials' => 'array',
+            'caterings' => 'array',
+            'vouchers' => 'array',
         ]);
 
-        // Buchung erstellen
+        // create booking
         $booking = new Booking;
         $booking->customer_name = $validatedData['customer_name'];
         $booking->start_date = $validatedData['start_date'];
@@ -67,13 +65,11 @@ class BookingController extends Controller
         $booking->user_id = $validatedData['user_id'];
         $booking->room_id = $validatedData['room_id'];
 
+        // store booking
         $booking->save();
 
         $voucherCount = $request->input('voucher_count', 0);
         $voucherLifetime = $request->input('voucher_lifetime', 0);
-
-        Log::info('Voucher Count: ' . $voucherCount);
-        Log::info('Voucher Lifetime: ' . $voucherLifetime);
 
         // Generate vouchers and associate them with the booking, if vouchers are requested
         if ($voucherCount && $voucherLifetime) {
@@ -103,7 +99,7 @@ class BookingController extends Controller
         try {
             $booking = Booking::findOrFail($id);
 
-            // Datenvalidierung
+            // validate data
             $validatedData = $request->validate([
                 'customer_name' => 'required',
                 'person_count' => 'required|integer',
@@ -111,9 +107,8 @@ class BookingController extends Controller
                 'end_date' => 'required|date_format:Y-m-d\TH:i:s',
                 'others' => 'nullable|string',
                 'user_id' => 'required|integer',
-                'room_id' => 'required|integer',
-                'materials' => 'array', // Ensure materials are an array
-                'caterings' => 'array' // Ensure caterings are an array
+                'room_id' => 'required|integer', 'materials' => 'array',
+                'caterings' => 'array'
             ]);
 
             // Update the booking with the validated data
@@ -188,6 +183,7 @@ class BookingController extends Controller
         $roomCapacity = DB::table('rooms')->where('id', $roomId)->value('max_persons');
         $capacityExceeded = $personCount > $roomCapacity;
 
+        // return status as booleans
         return response()->json([
             'overlapping' => $overlapping,
             'capacityExceeded' => $capacityExceeded,

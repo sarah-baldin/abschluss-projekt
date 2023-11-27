@@ -24,20 +24,17 @@ use Illuminate\Support\Facades\Route;
 
 
 /* unprotected routes */
-
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 
-    Route::get('/rooms', [RoomController::class, 'index']);
     Route::get('/caterings', [CateringController::class, 'index']);
     Route::get('/materials', [MaterialController::class, 'index']);
 
     Route::get('/test-unifi-api', [UniFiApiController::class, 'testClient']);
-    /* Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']); */
 });
 
 /*
-    When a request is made to a route that uses the auth:sanctum middleware,
+    When a request is made to a protected route that uses the auth:sanctum middleware,
     Sanctum will check if the request contains a valid API token.
     If the token is valid, the request is allowed to proceed.
     If the token is invalid or missing,
@@ -59,6 +56,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
+    Route::get('/rooms', [RoomController::class, 'index']);
 
     Route::post('/create-voucher', [UniFiApiController::class, 'createVoucher']);
     Route::post('/bookings/check-overlapping', [BookingController::class, 'checkOverlapping']);
