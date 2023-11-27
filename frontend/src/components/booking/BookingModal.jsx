@@ -373,11 +373,11 @@ const BookingModal = ({
                   value={formData.room_id}
                   onChange={handleInputChange}
                 >
-                  {bookableRooms.map((room) => {
+                  {bookableRooms.map((room) => (
                     <option key={`room-${room.id}`} value={room.id}>
                       {room.name}
-                    </option>;
-                  })}
+                    </option>
+                  ))}
                 </Form.Control>
               </FloatingLabel>
             </Form.Group>
@@ -493,10 +493,8 @@ const BookingModal = ({
                     );
                   })}
               </div>
-            </Form.Group>;
-            {
-              /* Material */
-            }
+            </Form.Group>
+            ;{/* Material */}
             <Form.Group className="form-group-checkbox mb-3">
               <Form.Label>Material</Form.Label>
               <div className="materials-wrapper">
@@ -556,8 +554,8 @@ const BookingModal = ({
                   );
                 })}
               </div>
-            </Form.Group>;
-            ; ;{/* Sonstiges */}
+            </Form.Group>
+            ; ; ;{/* Sonstiges */}
             <Form.Group className="form-group-input mb-3">
               <FloatingLabel controlId="others" label="Sonst noch Wünsche?">
                 <Form.Control
