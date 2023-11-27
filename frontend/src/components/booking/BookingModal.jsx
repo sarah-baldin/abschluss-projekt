@@ -142,12 +142,12 @@ const BookingModal = ({
     }
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Watch for changes in start_date, end_date, and room_id
     if ((show, formData.start_date && formData.end_date && formData.room_id)) {
       checkOverlappingAndCapacity(formData);
     }
-  }, [show, formData]);
+  }, [show, formData]); */
 
   // handle BookingModal input changes
   const handleInputChange = (e) => {
@@ -237,7 +237,7 @@ const BookingModal = ({
 
     const updateBooking = async (bookingId, updatedData) => {
       // TODO!!!!! check error in console!
-      checkOverlappingAndCapacity(updatedData);
+      /* checkOverlappingAndCapacity(updatedData); */
 
       const modifiedData = {
         ...updatedData,
@@ -492,7 +492,7 @@ const BookingModal = ({
                   })}
               </div>
             </Form.Group>
-            ;{/* Material */}
+            {/* Material */}
             <Form.Group className="form-group-checkbox mb-3">
               <Form.Label>Material</Form.Label>
               <div className="materials-wrapper">
@@ -553,7 +553,7 @@ const BookingModal = ({
                 })}
               </div>
             </Form.Group>
-            ; ; ;{/* Sonstiges */}
+            {/* Sonstiges */}
             <Form.Group className="form-group-input mb-3">
               <FloatingLabel controlId="others" label="Sonst noch Wünsche?">
                 <Form.Control

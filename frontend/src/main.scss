@@ -50,6 +50,13 @@ a {
     }
 }
 
+.doku-wrapper {
+    height: 100vh;
+    iframe {
+        height: 100%;
+    }
+}
+
 @import "bootstrap";
 
 .modal-dialog{

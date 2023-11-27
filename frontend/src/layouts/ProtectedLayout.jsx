@@ -27,6 +27,7 @@ export default function DefaultLayout() {
     };
 
     fetchUser();
+    // eslint-disable-next-line
   }, []);
 
   // if the user is not logged in, redirect to the login page

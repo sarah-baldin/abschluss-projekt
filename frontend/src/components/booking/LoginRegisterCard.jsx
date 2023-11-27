@@ -67,13 +67,6 @@ function LoginRegisterCard() {
               placeholder="Password"
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicCheckbox">
-            <Form.Check
-              type="checkbox"
-              label="Stay logged in?"
-              onChange={handleInputChange}
-            />
-          </Form.Group>
           <Button variant="primary" size="lg" type="submit">
             Login
           </Button>
