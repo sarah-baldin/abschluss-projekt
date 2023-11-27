@@ -85,8 +85,6 @@ const BookingModal = ({
     fetchBookableRooms();
   }, []);
 
-  console.log("RRROOOOMS: ", bookableRooms);
-
   useEffect(() => {
     const transformedEvent = transformEventToBooking(selectedEvent, user);
     console.log("selectedEvent outside:", selectedEvent);

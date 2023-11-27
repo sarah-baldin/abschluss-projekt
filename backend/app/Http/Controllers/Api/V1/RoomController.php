@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
-use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
 
     public function index()
     {
-        // Get the currently authenticated user
+        /* // Get the currently authenticated user
         $user = auth()->user();
-        Log::debug("user---->", [$user && $user->role === 'RS']);
 
         // Check if the user has either 'CO' or 'EX' role and filter rooms accordingly
         $rooms = [];
@@ -23,10 +21,8 @@ class RoomController extends Controller
         } elseif ($user && $user->role === 'RS') {
             // If the user has the 'RS' role, get all rooms
             $rooms = Room::all();
-        }
-
-        Log::debug("rooms---->", [$rooms]);
-
+        } */
+        $rooms = Room::all();
         // Return the filtered rooms (in this case as JSON)
         return response()->json($rooms);
     }

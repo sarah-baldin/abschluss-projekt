@@ -9,7 +9,6 @@ const UserDashboard = () => {
           <h1 className="text-center">USER DASHBOARD</h1>
         </Col>
       </Row>
-      {/* Add other content of your UserDashboard */}
       <UserTable />
     </Container>
   );
